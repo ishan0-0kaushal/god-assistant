@@ -1,9 +1,15 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { c } from '../theme';
 
-type Props = { armed: boolean; count: number; onToggle: () => void; onApps: () => void };
+type Props = {
+  armed: boolean;
+  count: number;
+  status: { running: boolean; lastSeen: string | null };
+  onToggle: () => void;
+  onApps: () => void;
+};
 
-export default function Home({ armed, count, onToggle, onApps }: Props) {
+export default function Home({ armed, count, status, onToggle, onApps }: Props) {
   const tint = armed ? c.armed : c.safe;
 
   return (
@@ -19,9 +25,16 @@ export default function Home({ armed, count, onToggle, onApps }: Props) {
       <Text style={[s.state, { color: tint }]}>
         {armed ? `ARMED — guarding ${count} app${count === 1 ? '' : 's'}` : 'DISARMED'}
       </Text>
-      <Pressable onPress={onApps} hitSlop={12} style={s.link}>
-        <Text style={s.linkText}>Guarded apps ›</Text>
-      </Pressable>
+      <View style={s.link}>
+        <Pressable onPress={onApps} hitSlop={12}>
+          <Text style={s.linkText}>Guarded apps ›</Text>
+        </Pressable>
+        {armed && (
+          <Text style={s.diag}>
+            {status.running ? `Watching · last app: ${status.lastSeen ?? '—'}` : 'Service not running'}
+          </Text>
+        )}
+      </View>
     </View>
   );
 }
@@ -33,6 +46,7 @@ const s = StyleSheet.create({
   core: { flex: 1, borderRadius: SIZE, alignItems: 'center', justifyContent: 'center' },
   power: { color: c.bg, fontSize: 88, fontWeight: '300' },
   state: { fontSize: 20, fontWeight: '800', letterSpacing: 1.5, marginTop: 40, textAlign: 'center' },
-  link: { position: 'absolute', bottom: 24 },
+  link: { position: 'absolute', bottom: 24, alignItems: 'center', gap: 8 },
+  diag: { color: c.dim, fontSize: 11, opacity: 0.7 },
   linkText: { color: c.dim, fontSize: 15 },
 });

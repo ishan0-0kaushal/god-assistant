@@ -8,6 +8,7 @@ type TradegateNative = {
   setArmed(armed: boolean): void;
   setGuarded(packages: string[]): void;
   getInstalledApps(): Promise<InstalledApp[]>;
+  getStatus(): { running: boolean; lastSeen: string | null };
   getPermissions(): Permissions;
   openUsageSettings(): void;
   openOverlaySettings(): void;

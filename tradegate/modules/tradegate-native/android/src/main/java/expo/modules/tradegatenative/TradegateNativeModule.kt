@@ -54,6 +54,10 @@ class TradegateNativeModule : Module() {
         .sortedBy { (it["label"] as String).lowercase() }
     }
 
+    Function("getStatus") {
+      mapOf("running" to GuardService.running, "lastSeen" to GuardService.lastSeen)
+    }
+
     Function("getPermissions") {
       val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
       mapOf(

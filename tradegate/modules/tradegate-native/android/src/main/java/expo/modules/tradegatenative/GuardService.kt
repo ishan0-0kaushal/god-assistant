@@ -15,6 +15,15 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
+import android.graphics.Color
+import android.graphics.PixelFormat
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.view.View
+import android.view.WindowManager
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -36,6 +45,10 @@ class GuardService : Service() {
 
     /** Package that completed the gate and may stay open until the user leaves it. */
     @Volatile var allowedPackage: String? = null
+
+    /** Diagnostics surfaced on the home screen. */
+    @Volatile var running = false
+    @Volatile var lastSeen: String? = null
 
     /** Transient system surfaces that shouldn't count as "leaving" an app. */
     private val IGNORED = setOf(
@@ -61,6 +74,8 @@ class GuardService : Service() {
   private var lastEventTs = 0L
   private var foreground: String? = null
   private var lastGateLaunch = 0L
+  private lateinit var wm: WindowManager
+  private var overlay: View? = null
 
   private val tick = object : Runnable {
     override fun run() {
@@ -75,6 +90,7 @@ class GuardService : Service() {
     super.onCreate()
     usm = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     power = getSystemService(Context.POWER_SERVICE) as PowerManager
+    wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -89,11 +105,14 @@ class GuardService : Service() {
     handler.removeCallbacks(tick)
     lastEventTs = System.currentTimeMillis() - 10_000
     handler.post(tick)
+    running = true
     return START_STICKY
   }
 
   override fun onDestroy() {
     handler.removeCallbacks(tick)
+    hideOverlay()
+    running = false
     super.onDestroy()
   }
 
@@ -113,15 +132,17 @@ class GuardService : Service() {
     // Re-assert the gate if the user is sitting in a guarded app without having passed it
     // (gate launch failed, or they escaped it via recents).
     val fg = foreground ?: return
-    if (fg != allowedPackage && fg in Prefs.guarded(this) && now - lastGateLaunch > RELAUNCH_MS) {
-      launchGate(fg)
-    }
+    val gated = fg != allowedPackage && fg in Prefs.guarded(this)
+    if (!gated) hideOverlay()
+    else if (now - lastGateLaunch > RELAUNCH_MS) launchGate(fg)
   }
 
   private fun onResumed(pkg: String, cls: String?) {
     if (pkg in IGNORED) return
+    lastSeen = pkg
     if (pkg == packageName && cls == GateActivity::class.java.name) {
       foreground = pkg
+      hideOverlay() // the gate itself is up now
       return
     }
     if (pkg != allowedPackage) allowedPackage = null
@@ -133,12 +154,72 @@ class GuardService : Service() {
     val label = try {
       packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString()
     } catch (_: Exception) { pkg }
-    startActivity(
-      Intent(this, GateActivity::class.java)
-        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
-        .putExtra(GateActivity.EXTRA_PACKAGE, pkg)
-        .putExtra(GateActivity.EXTRA_LABEL, label)
+    // Cover the app first: an overlay window always works with "Display over other apps", and a
+    // visible overlay is what lets Android (and OEM skins) allow the activity launch below.
+    showOverlay(pkg, label)
+    openGate(pkg, label)
+  }
+
+  private fun openGate(pkg: String, label: String) {
+    try {
+      startActivity(
+        Intent(this, GateActivity::class.java)
+          .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+          .putExtra(GateActivity.EXTRA_PACKAGE, pkg)
+          .putExtra(GateActivity.EXTRA_LABEL, label)
+      )
+    } catch (_: Exception) {
+      // Blocked; the overlay's button retries with a user tap, which is always allowed.
+    }
+  }
+
+  private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+
+  private fun showOverlay(pkg: String, label: String) {
+    if (overlay != null) return
+    val root = LinearLayout(this).apply {
+      orientation = LinearLayout.VERTICAL
+      gravity = Gravity.CENTER
+      setBackgroundColor(Color.parseColor("#0B0B0D"))
+      setPadding(dp(32), dp(32), dp(32), dp(32))
+      isClickable = true // swallow touches so the app underneath can't be used
+    }
+    fun text(s: String, size: Float, color: String, bold: Boolean = false) = TextView(this).apply {
+      text = s
+      textSize = size
+      setTextColor(Color.parseColor(color))
+      gravity = Gravity.CENTER
+      if (bold) typeface = Typeface.DEFAULT_BOLD
+    }
+    root.addView(text("KILL SWITCH ARMED", 13f, "#FF453A", bold = true))
+    root.addView(text(label, 30f, "#F4F4F5", bold = true).apply { setPadding(0, dp(12), 0, dp(8)) })
+    root.addView(text("Breathe, move and write before you trade.", 15f, "#8A8A93"))
+    root.addView(text("Begin", 16f, "#0B0B0D", bold = true).apply {
+      background = GradientDrawable().apply { setColor(Color.parseColor("#F4F4F5")); cornerRadius = dp(16).toFloat() }
+      setPadding(dp(48), dp(18), dp(48), dp(18))
+      layoutParams = LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+      ).apply { topMargin = dp(40) }
+      setOnClickListener { openGate(pkg, label) }
+    })
+    val type = if (Build.VERSION.SDK_INT >= 26) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+      else @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_PHONE
+    val params = WindowManager.LayoutParams(
+      WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, type,
+      WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+      PixelFormat.OPAQUE
     )
+    try {
+      wm.addView(root, params)
+      overlay = root
+    } catch (_: Exception) {
+      // Overlay permission revoked; nothing more we can do from the background.
+    }
+  }
+
+  private fun hideOverlay() {
+    overlay?.let { runCatching { wm.removeView(it) } }
+    overlay = null
   }
 
   private fun buildNotification(): Notification {

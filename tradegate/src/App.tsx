@@ -12,6 +12,7 @@ type Screen = 'home' | 'apps' | 'perms';
 export default function App() {
   const [state, setState] = useState(() => Native.getState());
   const [perms, setPerms] = useState<Perms>(() => Native.getPermissions());
+  const [status, setStatus] = useState(() => Native.getStatus());
   // Onboarding shows first until the two required permissions are granted.
   const [screen, setScreen] = useState<Screen>(() => (perms.usage && perms.overlay ? 'home' : 'perms'));
 
@@ -24,6 +25,12 @@ export default function App() {
   }, []);
 
   useEffect(refresh, [refresh]);
+
+  // Diagnostics: shows whether the background service is alive and what it last saw.
+  useEffect(() => {
+    const id = setInterval(() => setStatus(Native.getStatus()), 2000);
+    return () => clearInterval(id);
+  }, []);
 
   // Permissions are granted in system Settings; re-read whenever we come back.
   useEffect(() => {
@@ -54,6 +61,7 @@ export default function App() {
           <Home
             armed={state.armed}
             count={state.guarded.length}
+          status={status}
             onToggle={toggle}
             onApps={() => setScreen('apps')}
           />
