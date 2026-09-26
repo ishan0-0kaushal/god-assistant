@@ -26,6 +26,9 @@ export default function Squats({ onDone }: { onDone: () => void }) {
           {!done && <Text style={s.plus}>+1</Text>}
         </Pressable>
       </View>
+      <View style={s.track}>
+        <View style={[s.fill, { width: `${(n / SQUAT_TARGET) * 100}%` }]} />
+      </View>
       <Button label={done ? 'Continue' : `${SQUAT_TARGET - n} to go`} disabled={!done} onPress={onDone} />
     </View>
   );
@@ -42,5 +45,7 @@ const s = StyleSheet.create({
   },
   count: { color: c.text, fontSize: 72, fontWeight: '200', fontVariant: ['tabular-nums'] },
   of: { color: c.dim, fontSize: 14 },
+  track: { height: 6, borderRadius: 3, backgroundColor: c.line, overflow: 'hidden', marginBottom: 20 },
+  fill: { height: '100%', backgroundColor: c.armed },
   plus: { color: c.armed, fontSize: 18, fontWeight: '600', marginTop: 10 },
 });

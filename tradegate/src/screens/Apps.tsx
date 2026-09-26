@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, BackHandler, FlatList, Image, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import Native, { InstalledApp } from '../../modules/tradegate-native';
+import { Button } from '../ui';
 import { c } from '../theme';
 import Header from './Header';
 
@@ -31,7 +32,7 @@ export default function Apps({ guarded, onChange, onBack }: Props) {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header title="Guarded apps" onBack={onBack} />
+      <Header title="Guarded apps" />
       <TextInput
         style={s.search}
         placeholder="Search apps"
@@ -45,7 +46,7 @@ export default function Apps({ guarded, onChange, onBack }: Props) {
         <FlatList
           data={list}
           keyExtractor={(a) => a.packageName}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}
+          contentContainerStyle={{ paddingHorizontal: 24 }}
           renderItem={({ item }) => {
             const on = set.has(item.packageName);
             return (
@@ -67,6 +68,9 @@ export default function Apps({ guarded, onChange, onBack }: Props) {
           }}
         />
       )}
+      <View style={s.footer}>
+        <Button label="Done" onPress={onBack} />
+      </View>
     </View>
   );
 }
@@ -76,6 +80,7 @@ const s = StyleSheet.create({
     marginHorizontal: 24, marginBottom: 8, color: c.text, backgroundColor: c.surface,
     borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15,
   },
+  footer: { padding: 24, paddingTop: 12 },
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 14 },
   icon: { width: 40, height: 40, borderRadius: 10 },
   label: { flex: 1, color: c.text, fontSize: 15 },

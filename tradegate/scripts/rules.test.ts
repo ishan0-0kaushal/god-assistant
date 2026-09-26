@@ -20,6 +20,11 @@ assert.ok(lineProblem('asdfasdfasdfasdfasdfasdfasdfasdf'));   // one "word"
 assert.ok(lineProblem('aaaaa bbbbb ccccc ddddd eeeee fffff')); // mashing
 assert.equal(lineProblem('Bored and down 2k, want to revenge trade NIFTY'), null);
 const plan = 'Only buy BANKNIFTY above 48200, stop 48050, one lot';
-assert.ok(reflectionValid('Bored and down 2k, want to revenge trade NIFTY', plan));
-assert.ok(!reflectionValid(plan, plan), 'identical lines');
+const why = 'Bored and down 2k, want to revenge trade NIFTY';
+assert.ok(reflectionValid(`${why}\n${plan}`));
+assert.ok(reflectionValid(`${why}\n\n${plan}\n`), 'blank lines ignored');
+assert.ok(!reflectionValid(why), 'only one line');
+assert.ok(!reflectionValid(`${plan}\n${plan}`), 'identical lines');
+assert.ok(!reflectionValid(`${why}\nok`), 'second line too short');
+assert.ok(isTypedEdit(why, `${why}\n`), 'enter key');
 console.log('rules: all passed');

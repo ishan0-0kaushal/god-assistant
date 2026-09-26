@@ -9,9 +9,10 @@ import Permissions from './screens/Permissions';
 type Screen = 'home' | 'apps' | 'perms';
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('home');
   const [state, setState] = useState(Native.getState);
   const [perms, setPerms] = useState<Perms>(Native.getPermissions);
+  // Onboarding shows first until the two required permissions are granted.
+  const [screen, setScreen] = useState<Screen>(() => (perms.usage && perms.overlay ? 'home' : 'perms'));
 
   const refresh = useCallback(() => {
     setState(Native.getState());
@@ -46,10 +47,8 @@ export default function App() {
         <Home
           armed={state.armed}
           count={state.guarded.length}
-          needsPerms={!ready || !perms.battery}
           onToggle={toggle}
           onApps={() => setScreen('apps')}
-          onPerms={() => setScreen('perms')}
         />
       )}
       {screen === 'apps' && (
@@ -62,7 +61,7 @@ export default function App() {
           onBack={() => setScreen('home')}
         />
       )}
-      {screen === 'perms' && <Permissions perms={perms} onBack={() => setScreen('home')} />}
+      {screen === 'perms' && <Permissions perms={perms} onDone={() => setScreen('home')} />}
     </View>
   );
 }

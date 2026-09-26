@@ -39,6 +39,16 @@ export function lineProblem(line: string): string | null {
   return null;
 }
 
-export function reflectionValid(a: string, b: string): boolean {
-  return !lineProblem(a) && !lineProblem(b) && a.trim().toLowerCase() !== b.trim().toLowerCase();
+/** Status for each of the two required lines (null = line passes). */
+export function reflectionProblems(text: string): [string | null, string | null] {
+  const [a = '', b = ''] = text.split('\n').filter((l) => l.trim());
+  const pa = a ? lineProblem(a) : 'Start typing';
+  let pb = b ? lineProblem(b) : 'Press enter and write line 2';
+  if (!pa && !pb && a.trim().toLowerCase() === b.trim().toLowerCase()) pb = 'Don\'t repeat line 1';
+  return [pa, pb];
+}
+
+export function reflectionValid(text: string): boolean {
+  const [a, b] = reflectionProblems(text);
+  return !a && !b;
 }

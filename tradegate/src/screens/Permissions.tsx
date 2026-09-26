@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { BackHandler, PermissionsAndroid, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { PermissionsAndroid, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Native, { Permissions as Perms } from '../../modules/tradegate-native';
 import { c } from '../theme';
 import Header from './Header';
+import { Button } from '../ui';
 
 type Item = { key: keyof Perms; title: string; why: string; open: () => void; required?: boolean };
 
@@ -29,7 +30,8 @@ const ITEMS: Item[] = [
   },
 ];
 
-export default function Permissions({ perms, onBack }: { perms: Perms; onBack: () => void }) {
+export default function Permissions({ perms, onDone }: { perms: Perms; onDone: () => void }) {
+  const ready = perms.usage && perms.overlay;
   useEffect(() => {
     // The armed notification needs this on Android 13+; ask once, inline.
     if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -37,14 +39,9 @@ export default function Permissions({ perms, onBack }: { perms: Perms; onBack: (
     }
   }, []);
 
-  useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => (onBack(), true));
-    return () => sub.remove();
-  }, [onBack]);
-
   return (
     <View style={{ flex: 1 }}>
-      <Header title="Permissions" onBack={onBack} />
+      <Header title="Before you arm" subtitle="TradeGate needs two permissions to catch trading apps as they open." />
       <ScrollView contentContainerStyle={s.list}>
         {ITEMS.map((it) => {
           const ok = perms[it.key];
@@ -62,6 +59,9 @@ export default function Permissions({ perms, onBack }: { perms: Perms; onBack: (
           );
         })}
       </ScrollView>
+      <View style={{ padding: 24, paddingTop: 12 }}>
+        <Button label={ready ? 'Continue' : 'Grant the required permissions'} disabled={!ready} onPress={onDone} />
+      </View>
     </View>
   );
 }
