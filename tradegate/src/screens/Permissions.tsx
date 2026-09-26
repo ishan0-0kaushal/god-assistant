@@ -12,21 +12,21 @@ const ITEMS: Item[] = [
     key: 'usage',
     title: 'Usage access',
     why: 'Lets TradeGate see which app just opened, so it knows when you open a trading app. Nothing leaves your phone.',
-    open: Native.openUsageSettings,
+    open: () => Native.openUsageSettings(),
     required: true,
   },
   {
     key: 'overlay',
     title: 'Display over other apps',
     why: 'Lets TradeGate put the pause screen on top of a trading app the moment it opens.',
-    open: Native.openOverlaySettings,
+    open: () => Native.openOverlaySettings(),
     required: true,
   },
   {
     key: 'battery',
     title: 'Ignore battery optimization',
     why: 'Stops Android from killing the kill switch in the background.',
-    open: Native.requestBatteryExemption,
+    open: () => Native.requestBatteryExemption(),
   },
 ];
 

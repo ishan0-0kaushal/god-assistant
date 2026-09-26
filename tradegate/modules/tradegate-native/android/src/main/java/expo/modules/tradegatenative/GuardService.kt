@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -30,6 +31,8 @@ class GuardService : Service() {
     private const val NOTIFICATION_ID = 7201
     private const val POLL_MS = 400L
     private const val RELAUNCH_MS = 1500L
+    /** Events can land in the log slightly late, so each query overlaps the previous one. */
+    private const val LOOKBACK_MS = 5000L
 
     /** Package that completed the gate and may stay open until the user leaves it. */
     @Volatile var allowedPackage: String? = null
@@ -42,8 +45,9 @@ class GuardService : Service() {
       "com.android.permissioncontroller",
     )
 
-    fun start(ctx: Context) =
+    fun start(ctx: Context) {
       ContextCompat.startForegroundService(ctx, Intent(ctx, GuardService::class.java))
+    }
 
     fun stop(ctx: Context) {
       allowedPackage = null
@@ -53,7 +57,8 @@ class GuardService : Service() {
 
   private val handler = Handler(Looper.getMainLooper())
   private lateinit var usm: UsageStatsManager
-  private var lastQuery = 0L
+  private lateinit var power: PowerManager
+  private var lastEventTs = 0L
   private var foreground: String? = null
   private var lastGateLaunch = 0L
 
@@ -69,6 +74,7 @@ class GuardService : Service() {
   override fun onCreate() {
     super.onCreate()
     usm = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+    power = getSystemService(Context.POWER_SERVICE) as PowerManager
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -81,7 +87,7 @@ class GuardService : Service() {
       return START_NOT_STICKY
     }
     handler.removeCallbacks(tick)
-    lastQuery = System.currentTimeMillis() - 10_000
+    lastEventTs = System.currentTimeMillis() - 10_000
     handler.post(tick)
     return START_STICKY
   }
@@ -92,12 +98,15 @@ class GuardService : Service() {
   }
 
   private fun poll() {
+    if (!power.isInteractive) return // nothing can be opened with the screen off
     val now = System.currentTimeMillis()
-    val events = usm.queryEvents(lastQuery, now)
-    lastQuery = now
+    val events = usm.queryEvents(minOf(lastEventTs, now - LOOKBACK_MS), now)
     val e = UsageEvents.Event()
     while (events.hasNextEvent()) {
       events.getNextEvent(e)
+      // Replaying an old event would wrongly clear the allowance, so only handle new ones.
+      if (e.timeStamp <= lastEventTs) continue
+      lastEventTs = e.timeStamp
       if (e.eventType == UsageEvents.Event.ACTIVITY_RESUMED) onResumed(e.packageName, e.className)
     }
 
@@ -143,7 +152,7 @@ class GuardService : Service() {
       PendingIntent.getActivity(this, 0, it, PendingIntent.FLAG_IMMUTABLE)
     }
     return NotificationCompat.Builder(this, CHANNEL_ID)
-      .setSmallIcon(applicationInfo.icon)
+      .setSmallIcon(R.drawable.tradegate_notification)
       .setContentTitle("Kill switch armed")
       .setContentText("Trading apps are gated. Open TradeGate to disarm.")
       .setContentIntent(open)

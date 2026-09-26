@@ -81,7 +81,9 @@ class TradegateNativeModule : Module() {
       ctx.packageManager.getLaunchIntentForPackage(pkg)?.let {
         ctx.startActivity(it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
       }
-      (appContext.currentActivity as? GateActivity)?.finish()
+      val gate = appContext.currentActivity as? GateActivity
+      gate?.runOnUiThread { gate.finish() }
+      Unit
     }
   }
 

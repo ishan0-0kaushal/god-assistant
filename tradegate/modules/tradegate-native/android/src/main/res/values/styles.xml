@@ -1,0 +1,9 @@
+<resources>
+  <!-- Dark from the first frame so the gate never flashes white before JS renders. -->
+  <style name="TradeGate.Gate" parent="Theme.AppCompat.NoActionBar">
+    <item name="android:windowBackground">@color/tradegate_bg</item>
+    <item name="android:statusBarColor">@color/tradegate_bg</item>
+    <item name="android:navigationBarColor">@color/tradegate_bg</item>
+  </style>
+  <color name="tradegate_bg">#0B0B0D</color>
+</resources>

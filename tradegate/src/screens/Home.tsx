@@ -33,6 +33,6 @@ const s = StyleSheet.create({
   core: { flex: 1, borderRadius: SIZE, alignItems: 'center', justifyContent: 'center' },
   power: { color: c.bg, fontSize: 88, fontWeight: '300' },
   state: { fontSize: 20, fontWeight: '800', letterSpacing: 1.5, marginTop: 40, textAlign: 'center' },
-  link: { position: 'absolute', bottom: 48 },
+  link: { position: 'absolute', bottom: 24 },
   linkText: { color: c.dim, fontSize: 15 },
 });

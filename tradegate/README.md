@@ -7,6 +7,7 @@ Personal anti-overtrading kill switch for Android. When armed, opening any guard
 ```bash
 npm install
 npx expo run:android      # dev client build on a USB device (needs Android SDK)
+npx eas-cli@latest build -p android --profile preview   # cloud-built installable APK
 npm test                  # gate rules (paste diff + reflection quality)
 ```
 

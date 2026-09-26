@@ -27,4 +27,10 @@ class GateActivity : ReactActivity() {
   override fun onBackPressed() = Unit
 
   override fun invokeDefaultOnBackPressed() = Unit
+
+  // Leaving the gate (home, recents, screen off) throws away progress; the service re-gates.
+  override fun onStop() {
+    super.onStop()
+    if (!isChangingConfigurations) finish()
+  }
 }

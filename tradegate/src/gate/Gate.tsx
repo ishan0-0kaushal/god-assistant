@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BackHandler, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Native from '../../modules/tradegate-native';
 import { c } from '../theme';
 import Breathe from './Breathe';
@@ -21,26 +22,28 @@ export default function Gate({ packageName = '', appLabel = 'app' }: Props) {
   }, []);
 
   return (
-    <View style={s.root}>
-      <StatusBar barStyle="light-content" backgroundColor={c.bg} />
-      <View style={s.head}>
-        <View style={s.dots}>
-          {TITLES.map((_, i) => (
-            <View key={i} style={[s.dot, i <= step && s.dotOn]} />
-          ))}
+    <SafeAreaProvider>
+      <SafeAreaView style={s.root}>
+        <StatusBar barStyle="light-content" />
+        <View style={s.head}>
+          <View style={s.dots}>
+            {TITLES.map((_, i) => (
+              <View key={i} style={[s.dot, i <= step && s.dotOn]} />
+            ))}
+          </View>
+          <Text style={s.kicker}>Opening {appLabel}</Text>
+          <Text style={s.title}>{TITLES[step]}</Text>
         </View>
-        <Text style={s.kicker}>Opening {appLabel}</Text>
-        <Text style={s.title}>{TITLES[step]}</Text>
-      </View>
-      {step === 0 && <Breathe onDone={next} />}
-      {step === 1 && <Squats onDone={next} />}
-      {step === 2 && <Reflect appLabel={appLabel} onDone={() => Native.completeGate(packageName)} />}
-    </View>
+        {step === 0 && <Breathe onDone={next} />}
+        {step === 1 && <Squats onDone={next} />}
+        {step === 2 && <Reflect appLabel={appLabel} onDone={() => Native.completeGate(packageName)} />}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 24, paddingTop: 56, paddingBottom: 32 },
+  root: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 24, paddingTop: 24, paddingBottom: 16 },
   head: { marginBottom: 24 },
   dots: { flexDirection: 'row', gap: 6, marginBottom: 28 },
   dot: { flex: 1, height: 3, borderRadius: 2, backgroundColor: c.line },

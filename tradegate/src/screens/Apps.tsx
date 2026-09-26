@@ -80,7 +80,7 @@ const s = StyleSheet.create({
     marginHorizontal: 24, marginBottom: 8, color: c.text, backgroundColor: c.surface,
     borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15,
   },
-  footer: { padding: 24, paddingTop: 12 },
+  footer: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 16 },
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 14 },
   icon: { width: 40, height: 40, borderRadius: 10 },
   label: { flex: 1, color: c.text, fontSize: 15 },
