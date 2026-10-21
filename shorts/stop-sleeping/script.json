@@ -1,0 +1,86 @@
+{
+  "title": "What if you stopped sleeping?",
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "voice": {
+    "provider": "elevenlabs",
+    "voice_id": "onwK4e9ZLuTAKqWW03F9",
+    "voice_name": "Daniel - Steady Broadcaster",
+    "model_id": "eleven_multilingual_v2",
+    "settings": { "stability": 0.8, "similarity_boost": 0.75, "style": 0.0, "use_speaker_boost": true, "speed": 1.0 }
+  },
+  "pacing": {
+    "lead_s": 0.0,
+    "tail_s": 0.2,
+    "next_lead_s": 0.04,
+    "end_hold_s": 0.6,
+    "estimate_chars_per_s": 17
+  },
+  "scenes": [
+    {
+      "id": "s1",
+      "vo": "This is the longest a human has ever stayed awake. His body was shutting down one system at a time.",
+      "cues": {
+        "awake": { "word": "awake", "edge": "end" },
+        "systems_start": { "word": "shutting" },
+        "systems_end": { "word": "time", "edge": "end" }
+      },
+      "text": [
+        { "at": "start", "hold_from_frame0": true, "lines": ["DAY *11.*"], "size": 230 }
+      ]
+    },
+    {
+      "id": "s2",
+      "vo": "After one day, your brain starts forcing tiny blackouts — micro-sleeps. You're awake, but your brain isn't.",
+      "cues": {
+        "blackout1": { "word": "blackouts", "offset": 0.12, "frames": 5 },
+        "micro": { "word": "micro-sleeps" },
+        "blackout2": { "word": "awake", "edge": "end", "frames": 4 },
+        "blackout3": { "word": "isn't", "edge": "end", "frames": 8 }
+      },
+      "text": [
+        { "at": "start", "lines": ["*24 HRS:*", "focus gone"], "size": 128 },
+        { "at": "micro", "lines": ["*36 HRS:*", "micro-sleeps", "begin"], "size": 128 }
+      ]
+    },
+    {
+      "id": "s3",
+      "vo": "By day three, you start seeing things that aren't there. Your core temperature drops. Your heart rhythm glitches.",
+      "cues": {
+        "phantom": { "word": "aren't" },
+        "temp": { "word": "temperature" },
+        "heart": { "word": "heart" },
+        "glitch": { "word": "glitches" }
+      },
+      "text": [
+        { "at": "start", "lines": ["*DAY 3:*", "hallucinations"], "size": 128 }
+      ]
+    },
+    {
+      "id": "s4",
+      "vo": "Push past eleven days and your organs begin to fail. No one has survived much longer — on purpose.",
+      "cues": {
+        "organs": { "word": "organs" },
+        "fail": { "word": "fail" },
+        "no_one": { "word": "No" },
+        "purpose": { "word": "purpose", "edge": "end" }
+      },
+      "text": [
+        { "at": "start", "lines": ["*DAY 11:*", "the record"], "size": 128 },
+        { "at": "no_one", "lines": ["any further", "= *death*"], "size": 128 }
+      ]
+    },
+    {
+      "id": "end",
+      "vo": "Follow — your body breaks in ways you'd never guess.",
+      "cues": {
+        "question": { "word": "your" }
+      },
+      "text": [
+        { "at": "start", "lines": ["so…"], "size": 230 },
+        { "at": "question", "lines": ["how long could", "*YOU* last?"], "size": 128 }
+      ]
+    }
+  ]
+}

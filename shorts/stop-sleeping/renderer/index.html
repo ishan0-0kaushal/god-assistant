@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html, body { margin: 0; background: #000; } canvas { display: block; }</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="components.js"></script>
+<script src="scenes.js"></script>
+<script>
+const ctx = document.getElementById('c').getContext('2d');
+
+window.setup = async (timeline) => {
+  const fonts = [
+    [FONT.black, '/usr/share/fonts/opentype/inter/Inter-Black.otf'],
+    [FONT.bold, '/usr/share/fonts/opentype/inter/Inter-ExtraBold.otf'],
+    [FONT.mono, '/usr/share/fonts/truetype/jetbrains-mono/JetBrainsMono-ExtraBold.ttf'],
+  ];
+  for (const [name, path] of fonts) {
+    const face = new FontFace(name, `url("file://${path}")`);
+    await face.load();
+    document.fonts.add(face);
+  }
+  TL = timeline;
+  VEINS = buildVeins(1964, EYE.cx, EYE.cy, EYE.w, EYE.h);
+  GRAIN = makeGrain();
+  for (const S of TL.scenes) BARS[S.id] = makeBars(S);
+  return TL.frames;
+};
+
+window.frame = (f, type, quality) => {
+  renderFrame(ctx, f);
+  return ctx.canvas.toDataURL(type, quality);
+};
+</script>
+</body>
+</html>
