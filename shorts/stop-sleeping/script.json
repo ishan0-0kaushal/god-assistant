@@ -20,6 +20,7 @@
   "scenes": [
     {
       "id": "s1",
+      "transition_in": "cut",
       "vo": "This is the longest a human has ever stayed awake. His body was shutting down one system at a time.",
       "cues": {
         "awake": { "word": "awake", "edge": "end" },
@@ -32,6 +33,7 @@
     },
     {
       "id": "s2",
+      "transition_in": "whip",
       "vo": "After one day, your brain starts forcing tiny blackouts — micro-sleeps. You're awake, but your brain isn't.",
       "cues": {
         "blackout1": { "word": "blackouts", "offset": 0.12, "frames": 5 },
@@ -46,6 +48,7 @@
     },
     {
       "id": "s3",
+      "transition_in": "cut",
       "vo": "By day three, you start seeing things that aren't there. Your core temperature drops. Your heart rhythm glitches.",
       "cues": {
         "phantom": { "word": "aren't" },
@@ -59,6 +62,7 @@
     },
     {
       "id": "s4",
+      "transition_in": "whip",
       "vo": "Push past eleven days and your organs begin to fail. No one has survived much longer — on purpose.",
       "cues": {
         "organs": { "word": "organs" },
@@ -73,6 +77,7 @@
     },
     {
       "id": "end",
+      "transition_in": "cut",
       "vo": "Follow — your body breaks in ways you'd never guess.",
       "cues": {
         "question": { "word": "your" }

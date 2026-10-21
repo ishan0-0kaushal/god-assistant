@@ -1,9 +1,13 @@
 """Synthesize the sound-design bed (build/sfx.wav) from build/timeline.json events.
 
-Everything is generated here, nothing is sampled: drone, heartbeat, clock ticks, glitches,
-ECG beeps, riser and flatline. The bed hard-mutes during micro-sleep blackouts.
+Everything is generated, nothing is sampled. This file is the synth kit plus the global
+layers (drone, heartbeats, cut impacts, whip whooshes, text pops, eye twitches); each scene
+adds its own sounds in sfx_scenes/<scene id>.py via build(bed, S, tl, kit), where kit is this
+module. The bed hard-mutes during micro-sleep blackouts and under the flatline.
 """
+import importlib.util
 import json
+import sys
 import wave
 from pathlib import Path
 
@@ -92,6 +96,49 @@ def beep(freq, length=0.09):
     return (np.sin(2 * np.pi * freq * t) + 0.15 * np.sin(4 * np.pi * freq * t)) * fade
 
 
+def noise(n):
+    return rng.standard_normal(n)
+
+
+def whoosh(length=0.35, rising=False):
+    """Air whoosh for whip pans and fast moves: band-passed noise with a swept centre."""
+    n = int(length * SR)
+    u = np.arange(n) / n
+    out = np.zeros(n)
+    bands = [(200, 600), (600, 1500), (1500, 4000)]
+    for k, (lo, hi) in enumerate(bands):
+        centre = u if rising else 1 - u
+        weight = np.exp(-((centre - k / 2) ** 2) / 0.08)
+        out += bandpass(noise(n), lo=lo, hi=hi) * weight
+    shape = np.sin(np.pi * u) ** (0.7 if rising else 1.5)
+    return out * shape
+
+
+def thud(depth=1.0):
+    """Body / object hitting the ground."""
+    n = int(0.45 * SR)
+    return (sweep(90 * depth, 35 * depth, 0.45) * env(n, 0.002, 0.09)
+            + bandpass(noise(n), hi=600) * env(n, 0.001, 0.03) * 0.8)
+
+
+def crack():
+    """Sharp fracture: a click plus a crackle of broadband noise."""
+    n = int(0.25 * SR)
+    t = np.arange(n) / SR
+    crackle = bandpass(noise(n), lo=1800, hi=9000) * (np.abs(np.sin(2 * np.pi * 37 * t)) > 0.6)
+    return bandpass(noise(n), lo=800) * env(n, 0.0005, 0.006) * 1.2 + crackle * env(n, 0.001, 0.06)
+
+
+def load_scene_module(sid):
+    path = ROOT / "sfx_scenes" / f"{sid}.py"
+    if not path.exists():
+        return None
+    spec = importlib.util.spec_from_file_location(f"sfx_scene_{sid}", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def main():
     tl = json.loads((BUILD / "timeline.json").read_text())
     dur, ev = tl["duration"], tl["events"]
@@ -115,60 +162,30 @@ def main():
     drone *= level * (0.85 + 0.15 * np.sin(2 * np.pi * 0.23 * t)) * 0.16
     bed.add(drone, 0, 1.0)
 
-    # --- s3: whisper swells, eerie beating high pair, phantom swell
-    s3 = sc["s3"]
-    m = (t >= s3["start"]) & (t < s3["end"])
-    n3 = int(m.sum())
-    t3 = np.arange(n3) / SR
-    knots = np.arange(0, t3[-1] + 0.25, 0.12)
-    swell = np.clip(np.interp(t3, knots, rng.random(len(knots))) * 1.6 - 0.6, 0, 1)
-    whisper = bandpass(rng.standard_normal(n3), lo=1400, hi=5000) * swell
-    ramp = np.minimum(1, t3 / 1.5)
-    for pan in (-0.7, 0.7):
-        bed.add(whisper * ramp * (0.6 + 0.4 * np.sin(t3 * 1.3 + pan * 2)), s3["start"], 0.07, pan)
-    bed.add((np.sin(2 * np.pi * 1318 * t3) + np.sin(2 * np.pi * 1331 * t3)) * ramp, s3["start"], 0.01)
-    ph = s3["start"] + s3["cues"]["phantom"]
-    n = int(0.6 * SR)
-    rise = bandpass(rng.standard_normal(n), lo=300, hi=3000) * (np.arange(n) / n) ** 3
-    bed.add(rise, ph - 0.45, 0.45, 0.5)
-    bed.add(impact(), ph + 0.12, 0.35, 0.5)
-
-    # --- s4: riser and sub swell into the flatline
-    s4 = sc["s4"]
-    flat0, flat1 = ev["flatline"]
-    length = flat0 - s4["start"]
-    n = int(length * SR)
-    u = np.arange(n) / n
-    riser = sweep(160, 700, length) * u ** 2 * 0.5 + bandpass(rng.standard_normal(n), lo=2000) * u ** 3 * 0.35
-    sub = np.sin(2 * np.pi * 41 * np.arange(n) / SR) * u ** 1.5
-    bed.add(riser, s4["start"], 0.2)
-    bed.add(sub, s4["start"], 0.4)
-    bed.add(impact(), s4["start"] + s4["cues"]["fail"], 0.8)
-
     # --- events
     hb = heartbeat()
     for x in ev["heartbeats"]:
         bed.add(hb, x, 0.75)
     for x in ev["cuts"]:
         bed.add(impact(), x, 0.7)
+    for x in ev.get("whips", []):
+        bed.add(whoosh(0.32), x - 0.2, 0.55)
     for tw in ev["twitches"]:
         bed.add(glitch(), tw["t"], 0.16, rng.uniform(-0.4, 0.4))
-    for i, x in enumerate(ev["ticks"]):
-        bed.add(tick(2600 if i % 2 else 2000), x, 0.11, 0.35)
     for x in ev["text_pops"]:
         bed.add(tick(1500), x, 0.12)
-    for x in ev["systems"]:
-        n = int(0.16 * SR)
-        bed.add(sweep(900, 240, 0.16) * env(n, 0.002, 0.08), x, 0.12)
-    for b in ev["ecg"]:
-        if b["glitch"]:
-            f = 1000 * (1 + 0.25 * rng.uniform(-1, 1))
-            for k in range(3):
-                bed.add(beep(f, 0.025), b["t"] + 0.13 + k * 0.035, 0.13)
-        else:
-            bed.add(beep(1000), b["t"] + 0.13, 0.13)
+
+    # --- per-scene sound design
+    only = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else None
+    for S in tl["scenes"]:
+        if only and S["id"] != only:
+            continue
+        mod = load_scene_module(S["id"])
+        if mod:
+            mod.build(bed, S, tl, sys.modules[__name__])
 
     # --- hard mutes: micro-sleeps, and everything but the flatline after "on purpose"
+    flat0, flat1 = ev["flatline"]
     gate = np.ones(bed.n)
     for a, b in ev["blackouts"] + [[flat0, flat1]]:
         gate[(t >= a) & (t < b)] = 0
@@ -179,12 +196,13 @@ def main():
 
     peak = np.abs(bed.buf).max()
     pcm = (bed.buf / max(peak, 1e-9) * 0.7 * 32767).astype(np.int16)
-    with wave.open(str(BUILD / "sfx.wav"), "wb") as w:
+    out = BUILD / (f"sfx_{only}.wav" if only else "sfx.wav")
+    with wave.open(str(out), "wb") as w:
         w.setnchannels(2)
         w.setsampwidth(2)
         w.setframerate(SR)
         w.writeframes(pcm.tobytes())
-    print(f"sfx: {BUILD / 'sfx.wav'} ({dur:.2f}s)")
+    print(f"sfx: {out} ({dur:.2f}s)")
 
 
 if __name__ == "__main__":

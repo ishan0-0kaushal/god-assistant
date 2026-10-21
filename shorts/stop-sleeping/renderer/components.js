@@ -114,20 +114,32 @@ function drawTextBeat(ctx, beat, t, o) {
     const y = top + lh * (li + 0.5);
     for (const tok of toks) {
       const ww = ctx.measureText(tok.w).width;
-      const p = beat.hold_from_frame0 ? 1 : ease.decel(remap(t - k * 0.06, 0, 0.28));
+      // slam: each word drops in oversized and lands hard, 2 frames after the previous one
+      const tw = t - k * 0.065;
+      const p = beat.hold_from_frame0 ? 1 : ease.decel(remap(tw, 0, 0.2));
       if (p > 0) {
         ctx.save();
-        ctx.globalAlpha = clamp(p * 1.6);
-        const s = lerp(1.22, 1, p);
-        ctx.translate(x + ww / 2, y + (1 - p) * 18);
+        ctx.globalAlpha = clamp(p * 3);
+        const s = lerp(1.6, 1, p);
+        // after landing: a short jolt, and danger words keep a nervous jitter
+        const land = beat.hold_from_frame0 ? 0 : Math.exp(-Math.max(0, tw - 0.2) * 14) * (tw > 0.2 ? 1 : 0);
+        const seed = Math.floor((o.ta ?? t) * 15) + k * 31;
+        const jit = tok.red ? 2.5 + 6 * land : 6 * land;
+        const jx = jit * hash(seed), jy = jit * hash(seed + 7);
+        ctx.translate(x + ww / 2 + jx, y + jy);
         ctx.scale(s, s);
         if (tok.red) {
-          ctx.shadowColor = 'rgba(255,43,43,0.55)';
+          // offset ghost reads as a glitch without adding a second accent colour
+          ctx.globalAlpha *= 0.45;
+          ctx.fillStyle = COL.red;
+          ctx.fillText(tok.w, -ww / 2 + 7 * hash(seed + 3), 4 * hash(seed + 5));
+          ctx.globalAlpha = clamp(p * 3);
+          ctx.shadowColor = 'rgba(255,43,43,0.6)';
           ctx.shadowBlur = size * 0.35;
           ctx.fillStyle = COL.red;
         } else {
-          ctx.shadowColor = 'rgba(0,0,0,0.85)';
-          ctx.shadowBlur = size * 0.2;
+          ctx.shadowColor = 'rgba(0,0,0,0.95)';
+          ctx.shadowBlur = size * 0.28;
           ctx.fillStyle = COL.fg;
         }
         ctx.fillText(tok.w, -ww / 2, 0);

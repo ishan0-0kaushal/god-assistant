@@ -117,7 +117,7 @@ def main():
                 blackout_frames[name] = cue["frames"]
 
         scenes.append({
-            "id": sc["id"], "start_f": cursor_f, "dur_f": dur_f,
+            "id": sc["id"], "transition": sc.get("transition_in", "cut"), "start_f": cursor_f, "dur_f": dur_f,
             "start": cursor_f / fps, "end": (cursor_f + dur_f) / fps,
             "vo": {"file": vo_file, "trim": round(trim, 4), "at": round(cursor_f / fps + lead, 4),
                    "len": round(min(clip_dur, speech_end + 0.25) - trim, 4)},
@@ -128,7 +128,8 @@ def main():
 
     total_f = cursor_f
     by_id = {s["id"]: s for s in scenes}
-    ev = {"cuts": [s["start"] for s in scenes[1:]], "blackouts": [], "heartbeats": [], "twitches": [],
+    ev = {"cuts": [s["start"] for s in scenes[1:] if s["transition"] == "cut"],
+          "whips": [s["start"] for s in scenes[1:] if s["transition"] == "whip"], "blackouts": [], "heartbeats": [], "twitches": [],
           "ticks": [], "ecg": [], "text_pops": [], "systems": [], "flatline": None}
 
     for s in scenes:

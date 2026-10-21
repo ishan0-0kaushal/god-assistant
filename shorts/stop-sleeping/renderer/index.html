@@ -7,7 +7,15 @@
 <body>
 <canvas id="c" width="1080" height="1920"></canvas>
 <script src="components.js"></script>
-<script src="scenes.js"></script>
+<script src="rig.js"></script>
+<script src="fx.js"></script>
+<script src="core.js"></script>
+<script src="scenes/_eye.js"></script>
+<script src="scenes/s1.js"></script>
+<script src="scenes/s2.js"></script>
+<script src="scenes/s3.js"></script>
+<script src="scenes/s4.js"></script>
+<script src="scenes/end.js"></script>
 <script>
 const ctx = document.getElementById('c').getContext('2d');
 
@@ -22,10 +30,7 @@ window.setup = async (timeline) => {
     await face.load();
     document.fonts.add(face);
   }
-  TL = timeline;
-  VEINS = buildVeins(1964, EYE.cx, EYE.cy, EYE.w, EYE.h);
-  GRAIN = makeGrain();
-  for (const S of TL.scenes) BARS[S.id] = makeBars(S);
+  setupCore(timeline);
   return TL.frames;
 };
 
