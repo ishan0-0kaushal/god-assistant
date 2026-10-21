@@ -49,12 +49,20 @@ function setupCore(timeline) {
   }
 }
 
+let _vignette = null;
 function overlays(ctx, f) {
-  const vg = ctx.createRadialGradient(W / 2, H * 0.48, H * 0.3, W / 2, H * 0.48, H * 0.78);
-  vg.addColorStop(0, 'rgba(0,0,0,0)');
-  vg.addColorStop(1, 'rgba(0,0,0,0.5)');
-  ctx.fillStyle = vg;
-  ctx.fillRect(0, 0, W, H);
+  if (!_vignette) {
+    _vignette = document.createElement('canvas');
+    _vignette.width = W;
+    _vignette.height = H;
+    const v = _vignette.getContext('2d');
+    const vg = v.createRadialGradient(W / 2, H * 0.48, H * 0.3, W / 2, H * 0.48, H * 0.78);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.5)');
+    v.fillStyle = vg;
+    v.fillRect(0, 0, W, H);
+  }
+  ctx.drawImage(_vignette, 0, 0);
   // coarse grain that changes every other frame: visible texture without wrecking the bitrate
   const g = f >> 1, tile = GRAIN[g % 3];
   ctx.save();

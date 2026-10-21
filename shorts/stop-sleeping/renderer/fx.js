@@ -155,9 +155,9 @@ function drawHUD(ctx, hud, ta) {
   const danger = clamp(hud.danger || 0);
   const col = danger > 0.5 ? COL.red : COL.fg;
   let digits = String(Math.max(0, Math.floor(hud.hours))).padStart(3, '0');
-  if (hud.glitch > 0 && hash(Math.floor(ta * 24) * 7) < hud.glitch * 0.8 - 0.1) {
-    digits = digits.split('').map((d, i) => (hash(Math.floor(ta * 24) + i * 5) > 0.3 ? String(Math.floor((0.5 + 0.5 * hash(i + Math.floor(ta * 24))) * 9.99)) : d)).join('');
-  }
+  // glitch shakes, ghosts and dims the real number; it never shows a false one
+  const gk = Math.floor(ta * 24);
+  const glitching = hud.glitch > 0 && ta > 0.25 && hash(gk * 7 + 3) < hud.glitch * 0.9 - 0.15;
   if (hud.text) digits = hud.text;
   ctx.save();
   ctx.globalAlpha = hud.alpha ?? 1;
@@ -190,7 +190,19 @@ function drawHUD(ctx, hud, ta) {
   if (danger > 0.5) { ctx.shadowColor = 'rgba(255,43,43,0.7)'; ctx.shadowBlur = 18; }
   ctx.letterSpacing = '0px';
   ctx.font = `78px ${FONT.mono}`;
-  ctx.fillText(digits, x, y + 3);
+  if (glitching) {
+    const jx = 14 * hash(gk * 11), jy = 5 * hash(gk * 13);
+    ctx.save();
+    ctx.globalAlpha *= 0.5;
+    ctx.fillStyle = COL.red;
+    ctx.fillText(digits, x + jx + 9, y + 3 + jy);
+    ctx.restore();
+    ctx.globalAlpha *= 0.65;
+    ctx.fillText(digits, x - jx * 0.5, y + 3);
+    ctx.globalAlpha /= 0.65;
+  } else {
+    ctx.fillText(digits, x, y + 3);
+  }
   ctx.shadowBlur = 0;
   x += dw + 20;
   ctx.font = `38px ${FONT.bold}`;

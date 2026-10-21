@@ -104,7 +104,7 @@ def main():
         trim = max(0.0, speech_start - 0.03)
         lead = pacing["lead_s"] if i == 0 else pacing["next_lead_s"]
         last = i == len(script["scenes"]) - 1
-        tail = pacing["end_hold_s"] if last else pacing["tail_s"]
+        tail = pacing["end_hold_s"] if last else sc.get("tail_s", pacing["tail_s"])
         shift = lead - trim  # clip time -> scene time
         dur_f = round((shift + speech_end + tail) * fps)
 

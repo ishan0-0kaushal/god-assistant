@@ -120,7 +120,7 @@ function drawTextBeat(ctx, beat, t, o) {
       if (p > 0) {
         ctx.save();
         ctx.globalAlpha = clamp(p * 3);
-        const s = lerp(1.6, 1, p);
+        const s = lerp(1.32, 1, p);
         // after landing: a short jolt, and danger words keep a nervous jitter
         const land = beat.hold_from_frame0 ? 0 : Math.exp(-Math.max(0, tw - 0.2) * 14) * (tw > 0.2 ? 1 : 0);
         const seed = Math.floor((o.ta ?? t) * 15) + k * 31;
@@ -177,7 +177,7 @@ class DrainBar {
     const { x, y, w, h } = this;
     const v = clamp(this.valueAt(t));
     const trail = clamp(Math.max(v, this.valueAt(t - this.trailLag)));
-    const danger = remap(v, this.warn + 0.05, this.warn);
+    const danger = v < this.warn ? 1 : 0;
     const empty = v <= 0.003;
     const blink = empty ? (Math.floor(t * 6) % 2 === 0 ? 1 : 0.35) : 1;
     const lw = Math.max(5, h * 0.09);

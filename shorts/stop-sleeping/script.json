@@ -20,6 +20,7 @@
   "scenes": [
     {
       "id": "s1",
+      "tail_s": 0.32,
       "transition_in": "cut",
       "vo": "This is the longest a human has ever stayed awake. His body was shutting down one system at a time.",
       "cues": {
@@ -62,6 +63,7 @@
     },
     {
       "id": "s4",
+      "tail_s": 0.6,
       "transition_in": "whip",
       "vo": "Push past eleven days and your organs begin to fail. No one has survived much longer — on purpose.",
       "cues": {

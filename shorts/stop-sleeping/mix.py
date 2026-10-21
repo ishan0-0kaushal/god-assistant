@@ -61,8 +61,9 @@ def main():
 
     pre_i, _ = loudness(pre)
     final = BUILD / "mix.wav"
-    ff("-i", str(pre), "-af", f"volume={target - pre_i:.2f}dB,alimiter=limit=0.84:attack=5:release=60:level=0",
-       "-ar", "48000", str(final))
+    # limit at 4x oversampling so inter-sample (true) peaks are caught, not just sample peaks
+    ff("-i", str(pre), "-af", f"volume={target - pre_i:.2f}dB,aresample=192000,"
+       "alimiter=limit=0.8:attack=2:release=60:level=0,aresample=48000", "-ar", "48000", str(final))
     fin_i, fin_tp = loudness(final)
 
     OUT.mkdir(exist_ok=True)
