@@ -4,8 +4,8 @@ Code-built YouTube Shorts for the Actually Animated channel (stickman explainers
 
 | # | Short | Script | Build | Status |
 |---|---|---|---|---|
-| 01 | What if Earth's gravity doubled every second? | [scripts/01-gravity-doubles.md](scripts/01-gravity-doubles.md) | Remotion | Script done |
-| 02 | Falling from every height | [scripts/02-fall-from-every-height.md](scripts/02-fall-from-every-height.md) | HyperFrames | Script done |
+| 01 | What if Earth's gravity doubled every second? | [scripts/01-gravity-doubles.md](scripts/01-gravity-doubles.md) | Remotion ([01-gravity-remotion](01-gravity-remotion)) | Draft rendered, placeholder SFX, no VO |
+| 02 | Falling from every height | [scripts/02-fall-from-every-height.md](scripts/02-fall-from-every-height.md) | HyperFrames ([02-falling-hyperframes](02-falling-hyperframes)) | Draft rendered, placeholder SFX, no VO |
 
 ## Format rules (from the vidIQ channel analysis)
 
@@ -15,7 +15,7 @@ Code-built YouTube Shorts for the Actually Animated channel (stickman explainers
 - The last frame matches the first so the video loops. No subscribe outro.
 - Hashtags: #whatif #physics #science #stickman. No borrowed meme-trend tags.
 
-## Voiceover
+## Voiceover (next step)
 
 Generated with ElevenLabs from the VO column of each script. Reads two environment variables:
 
@@ -23,3 +23,19 @@ Generated with ElevenLabs from the VO column of each script. Reads two environme
 - `ELEVENLABS_VOICE_ID`
 
 The cloud environment also needs `api.elevenlabs.io` under Allowed domains.
+
+Plan: generate each line with the timestamps endpoint, set every beat's start/end from the real
+word timings (`src/timeline.ts` for 01; `data-start` values and script times for 02), add the VO as
+an audio track, then re-render. The sound effects are ffmpeg placeholders and can be swapped for
+ElevenLabs sound effects with the same key.
+
+## Remotion vs HyperFrames, from building one short in each
+
+- **Retiming:** Remotion drives everything from one beats table, so fitting the voiceover is a
+  one-file change. The HyperFrames version has times spread across HTML attributes and script.
+- **Reuse:** the Remotion stickman, counter bar and captions are components with props, ready to
+  become a template. In HyperFrames the same things are copy-paste HTML/JS.
+- **Tooling:** HyperFrames' lint caught audio that would have rendered silent, and its `snapshot`
+  contact sheets made review fast. Its defaults load GSAP from a CDN, which had to be vendored here.
+- **Speed:** ~55 s (Remotion) vs ~85 s (HyperFrames) for a 30 s render on 4 cores.
+- **Pick for the daily template:** Remotion.

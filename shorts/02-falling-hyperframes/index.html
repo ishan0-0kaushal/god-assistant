@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Falling from every height</title>
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: Anton; src: url(assets/fonts/anton-400.woff2) format('woff2'); font-weight: 400; }
+      @font-face { font-family: Inter; src: url(assets/fonts/inter-800.woff2) format('woff2'); font-weight: 800; }
+      @font-face { font-family: Inter; src: url(assets/fonts/inter-900.woff2) format('woff2'); font-weight: 900; }
+
+      :root {
+        --ink: #0b1020;
+        --yellow: #ffd23f;
+        --red: #e63946;
+        --cyan: #5be0ff;
+        --green: #4ade80;
+        --panel: rgba(8, 12, 30, 0.82);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0a1430; }
+      #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Inter, sans-serif; }
+      .clip { position: absolute; inset: 0; }
+      svg.full { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+
+      .outline { -webkit-text-stroke: var(--sw, 12px) var(--ink); paint-order: stroke fill; }
+
+      #hlabel {
+        position: absolute; top: 70px; width: 1080px; text-align: center;
+        font-weight: 900; font-size: 36px; letter-spacing: 8px; color: var(--cyan); --sw: 6px;
+      }
+      #hval {
+        position: absolute; top: 110px; width: 1080px; height: 210px; display: flex; align-items: center; justify-content: center;
+        font-family: Anton, sans-serif; font-size: 190px; line-height: 1; color: var(--yellow);
+        text-shadow: 0 10px 0 rgba(0, 0, 0, 0.45); font-variant-numeric: tabular-nums;
+      }
+      .chiprow { position: absolute; top: 340px; width: 1080px; display: flex; justify-content: center; }
+      .chip {
+        display: inline-flex; align-items: center; gap: 14px; padding: 12px 28px; border-radius: 999px;
+        background: var(--panel); border: 3px solid rgba(255, 255, 255, 0.18);
+        color: #fff; font-weight: 800; font-size: 38px; letter-spacing: 1px; white-space: nowrap;
+      }
+      .stamp {
+        display: inline-block; font-family: Anton, sans-serif; font-size: 64px; padding: 2px 26px;
+        border: 8px solid currentColor; border-radius: 16px; background: rgba(8, 12, 30, 0.78); transform: rotate(-10deg);
+      }
+      .cap {
+        position: absolute; top: 1300px; left: 60px; width: 960px; height: 190px;
+        display: flex; align-items: center; justify-content: center; text-align: center;
+      }
+      .cap > div {
+        font-family: Anton, sans-serif; font-size: 74px; line-height: 1.12; color: #fff; text-transform: uppercase;
+        text-shadow: 0 8px 0 rgba(0, 0, 0, 0.5); --sw: 14px;
+      }
+      #flash { background: #fff; opacity: 0; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="30.4" data-width="1080" data-height="1920">
+
+      <!-- ===== Sky: the falling scene that runs underneath everything ===== -->
+      <div id="sky" class="clip" data-start="0" data-duration="30.4">
+        <svg class="full" viewBox="0 0 1080 1920">
+          <defs>
+            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop id="skyTop" offset="0%" stop-color="#2f80ed" />
+              <stop id="skyBot" offset="100%" stop-color="#a8dcff" />
+            </linearGradient>
+            <radialGradient id="earthGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="96%" stop-color="#3d8fe0" />
+              <stop offset="100%" stop-color="#9fe8ff" />
+            </radialGradient>
+          </defs>
+          <rect width="1080" height="1920" fill="url(#skyGrad)" />
+          <g id="stars"></g>
+          <circle id="earthCurve" cx="540" cy="3300" r="2300" fill="url(#earthGlow)" opacity="0" />
+          <g id="clouds"></g>
+          <g id="speedlines" stroke="#ffffff" stroke-linecap="round"></g>
+          <g id="jet"></g>
+          <g id="tail"></g>
+          <g id="arrows"></g>
+          <g id="booms" fill="none" stroke="#ffffff"></g>
+          <g id="faller"></g>
+        </svg>
+      </div>
+
+      <!-- ===== Ground drops: 1 m, 3 m, 15 m ===== -->
+      <div id="drop1" class="clip" data-start="2.6" data-duration="0.9">
+        <svg class="full" viewBox="0 0 1080 1920">
+          <use href="#groundScene" />
+          <rect x="300" y="835" width="170" height="165" rx="10" fill="#c98b4a" stroke="#0b1020" stroke-width="6" />
+          <path d="M300,835 L470,1000 M470,835 L300,1000" stroke="#8d5a2b" stroke-width="8" />
+          <g id="man1"><g id="man1pose"></g></g>
+          <text x="250" y="930" fill="#fff" font-family="Anton" font-size="44" text-anchor="end">1 m</text>
+        </svg>
+      </div>
+      <div id="drop2" class="clip" data-start="3.5" data-duration="1.0">
+        <svg class="full" viewBox="0 0 1080 1920">
+          <use href="#groundScene" />
+          <rect x="190" y="505" width="230" height="495" fill="#8a94a8" stroke="#0b1020" stroke-width="6" />
+          <g stroke="#6f7890" stroke-width="5">
+            <line x1="190" y1="585" x2="420" y2="585" /><line x1="190" y1="665" x2="420" y2="665" />
+            <line x1="190" y1="745" x2="420" y2="745" /><line x1="190" y1="825" x2="420" y2="825" />
+            <line x1="190" y1="905" x2="420" y2="905" />
+          </g>
+          <g id="man2"><g id="man2pose"></g></g>
+          <g id="crack" opacity="0">
+            <path d="M0,-40 L18,-18 L4,-6 L24,16 L8,24" fill="none" stroke="#e63946" stroke-width="9" stroke-linejoin="round" />
+          </g>
+          <text x="160" y="770" fill="#fff" font-family="Anton" font-size="44" text-anchor="end">3 m</text>
+        </svg>
+      </div>
+      <div id="drop3" class="clip" data-start="4.5" data-duration="1.9">
+        <svg class="full" viewBox="0 0 1080 1920">
+          <rect width="1080" height="1920" fill="url(#skyGrad)" />
+          <g id="world3">
+            <rect x="-200" y="1000" width="1480" height="1400" fill="#3b7d4f" />
+            <rect x="-200" y="1000" width="1480" height="26" fill="#56b06f" />
+            <rect x="110" y="-500" width="360" height="1500" fill="#c26a4a" stroke="#0b1020" stroke-width="6" />
+            <g id="windows"></g>
+            <text x="90" y="300" fill="#fff" font-family="Anton" font-size="50" text-anchor="end">15 m</text>
+            <g id="man3"></g>
+            <g id="dust" opacity="0"></g>
+          </g>
+          <g id="coin" opacity="0"></g>
+        </svg>
+      </div>
+
+      <!-- ===== Space Station orbit ===== -->
+      <div id="iss" class="clip" data-start="23.8" data-duration="6.6">
+        <svg class="full" viewBox="0 0 1080 1920">
+          <defs>
+            <radialGradient id="ocean" cx="40%" cy="35%" r="70%">
+              <stop offset="0%" stop-color="#3d8fe0" /><stop offset="100%" stop-color="#123766" />
+            </radialGradient>
+            <clipPath id="earthClip"><circle cx="540" cy="720" r="220" /></clipPath>
+          </defs>
+          <g id="issWorld">
+            <rect x="-2000" y="-2000" width="5080" height="5920" fill="#05081a" />
+            <g id="issStars"></g>
+            <circle cx="540" cy="720" r="236" fill="none" stroke="rgba(91,224,255,0.45)" stroke-width="20" />
+            <circle cx="540" cy="720" r="220" fill="url(#ocean)" stroke="#0b1020" stroke-width="6" />
+            <g clip-path="url(#earthClip)">
+              <g transform="translate(540,720) scale(0.73)">
+                <path d="M-210,-150 C-160,-220 -40,-200 -30,-130 C-20,-60 -110,-40 -140,10 C-170,60 -250,20 -240,-60 Z" fill="#3fa36b" />
+                <path d="M30,-60 C90,-120 200,-90 220,-20 C240,50 170,80 120,140 C80,190 30,150 40,90 C50,40 -10,10 30,-60 Z" fill="#3fa36b" />
+                <path d="M-120,150 C-80,120 -20,150 -40,210 C-60,260 -150,250 -150,200 Z" fill="#3fa36b" />
+              </g>
+            </g>
+            <circle cx="540" cy="720" r="340" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="4" stroke-dasharray="14 16" />
+            <path id="trail" fill="none" stroke="#fff6c9" stroke-width="7" stroke-linecap="round" />
+            <g id="station"></g>
+          </g>
+        </svg>
+      </div>
+
+      <!-- ===== HUD ===== -->
+      <div id="hud" class="clip" data-start="0" data-duration="30.4">
+        <div id="hlabel" class="outline">FALL HEIGHT</div>
+        <div id="hval" class="outline">450 m</div>
+        <svg id="gauge" class="full" viewBox="0 0 1080 1920"></svg>
+      </div>
+
+      <!-- ===== Callouts ===== -->
+      <div id="c-ok" class="clip" data-start="3.25" data-duration="0.25"><div class="chiprow"><div class="chip" style="color: var(--green)">✓ YOU'RE FINE</div></div></div>
+      <div id="c-ouch" class="clip" data-start="4.2" data-duration="0.3"><div class="chiprow"><div class="chip" style="color: #ffb703">OUCH: BROKEN ANKLE?</div></div></div>
+      <div id="c-flip" class="clip" data-start="5.65" data-duration="0.75"><div class="chiprow"><div class="chip" style="color: var(--red)">SURVIVAL ≈ 50%</div></div></div>
+      <div id="c-max" class="clip" data-start="8.0" data-duration="0.6">
+        <div style="position: absolute; top: 850px; width: 1080px; text-align: center"><span class="stamp" style="color: var(--red)">MAX SPEED</span></div>
+      </div>
+      <div id="c-equal" class="clip" data-start="10.3" data-duration="1.1"><div class="chiprow"><div class="chip" style="color: var(--yellow)">AIR = GRAVITY → SPEED STOPS</div></div></div>
+      <div id="c-still" class="clip" data-start="12.6" data-duration="1.4"><div class="chiprow"><div class="chip" style="color: var(--cyan)">STILL ~195 km/h</div></div></div>
+      <div id="c-vul" class="clip" data-start="14.2" data-duration="2.8">
+        <div style="position: absolute; top: 330px; width: 1080px; display: flex; flex-direction: column; align-items: center; gap: 10px">
+          <div class="chip" style="font-size: 44px; color: #fff">VESNA VULOVIĆ</div>
+          <div class="chip" style="font-size: 32px; color: rgba(255, 255, 255, 0.8)">FLIGHT ATTENDANT · 10,160 m · 1972</div>
+        </div>
+      </div>
+      <div id="c-record" class="clip" data-start="15.3" data-duration="1.7">
+        <div style="position: absolute; top: 850px; width: 1080px; text-align: center"><span class="stamp" style="color: var(--yellow)">WORLD RECORD</span></div>
+      </div>
+      <div id="c-felix" class="clip" data-start="17.1" data-duration="4.3"><div class="chiprow"><div class="chip">FELIX BAUMGARTNER · 2012</div></div></div>
+      <div id="c-mach" class="clip" data-start="19.5" data-duration="1.9">
+        <div style="position: absolute; top: 850px; width: 1080px; text-align: center"><span class="stamp" style="color: var(--cyan)">MACH 1.25</span></div>
+      </div>
+      <div id="c-fall" class="clip" data-start="25.0" data-duration="4.6">
+        <div style="position: absolute; top: 1150px; width: 1080px; display: flex; flex-direction: column; align-items: center; gap: 10px">
+          <div id="c-fall-1" class="chip" style="color: var(--red); font-size: 34px">↓ FALLING TOWARD EARTH</div>
+          <div id="c-fall-2" class="chip" style="color: var(--cyan); font-size: 34px">→ 27,600 km/h SIDEWAYS</div>
+        </div>
+      </div>
+
+      <!-- ===== Captions (the VO lines) ===== -->
+      <div class="clip cap" data-start="0" data-duration="2.6"><div class="outline">Past 450 meters, it doesn't matter how high you fall.</div></div>
+      <div class="clip cap" data-start="2.6" data-duration="0.9"><div class="outline">One meter.</div></div>
+      <div class="clip cap" data-start="3.5" data-duration="1.0"><div class="outline">Three.</div></div>
+      <div class="clip cap" data-start="4.5" data-duration="1.9"><div class="outline">Fifteen: that's a coin flip.</div></div>
+      <div class="clip cap" data-start="6.4" data-duration="2.2"><div class="outline">Then, at 450… the needle stops.</div></div>
+      <div class="clip cap" data-start="8.6" data-duration="2.8"><div class="outline">Air pushes up as hard as gravity pulls down.</div></div>
+      <div class="clip cap" data-start="11.4" data-duration="2.6"><div class="outline">Ten kilometers? Same 200 kilometers an hour.</div></div>
+      <div class="clip cap" data-start="14.0" data-duration="3.0"><div class="outline">In 1972, a flight attendant fell that far. And lived.</div></div>
+      <div class="clip cap" data-start="17.0" data-duration="4.4"><div class="outline">At 39 kilometers, the air's so thin, Felix Baumgartner broke the sound barrier.</div></div>
+      <div class="clip cap" data-start="21.4" data-duration="2.4"><div class="outline">Then thick air braked him back to 200.</div></div>
+      <div class="clip cap" data-start="23.8" data-duration="1.2"><div class="outline">And at 400 kilometers?</div></div>
+      <div class="clip cap" data-start="25.0" data-duration="1.6"><div class="outline">The Space Station is falling right now.</div></div>
+      <div class="clip cap" data-start="26.6" data-duration="3.8"><div class="outline">Just sideways so fast it keeps missing the ground.</div></div>
+
+      <div id="flash" class="clip" data-start="0" data-duration="30.4"></div>
+
+      <!-- ===== Sound effects (voiceover gets added as its own track) ===== -->
+      <audio id="sfx-1" class="clip" data-start="0" data-duration="2.6" data-volume="0.5" data-fade-out="0.2" src="assets/sfx/wind.wav"></audio>
+      <audio id="sfx-2" class="clip" data-start="3.17" data-duration="0.3" data-volume="0.9" src="assets/sfx/thud_soft.wav"></audio>
+      <audio id="sfx-3" class="clip" data-start="4.17" data-duration="0.3" data-volume="0.9" src="assets/sfx/thud_soft.wav"></audio>
+      <audio id="sfx-4" class="clip" data-start="4.19" data-duration="0.12" data-volume="1" src="assets/sfx/crack.wav"></audio>
+      <audio id="sfx-5" class="clip" data-start="4.6" data-duration="0.5" data-volume="0.7" src="assets/sfx/whoosh.wav"></audio>
+      <audio id="sfx-6" class="clip" data-start="5.6" data-duration="0.8" data-volume="1" src="assets/sfx/thud_heavy.wav"></audio>
+      <audio id="sfx-7" class="clip" data-start="5.7" data-duration="0.6" data-volume="0.6" src="assets/sfx/ding.wav"></audio>
+      <audio id="sfx-8" class="clip" data-start="6.4" data-duration="8.0" data-volume="0.6" data-fade-in="0.4" data-fade-out="0.4" src="assets/sfx/wind.wav"></audio>
+      <audio id="sfx-9" class="clip" data-start="8.0" data-duration="0.3" data-volume="1" src="assets/sfx/thunk.wav"></audio>
+      <audio id="sfx-10" class="clip" data-start="10.3" data-duration="0.35" data-volume="0.8" src="assets/sfx/stamp.wav"></audio>
+      <audio id="sfx-11" class="clip" data-start="12.2" data-duration="0.5" data-volume="0.8" src="assets/sfx/whoosh.wav"></audio>
+      <audio id="sfx-12" class="clip" data-start="14.4" data-duration="7.0" data-volume="0.6" data-fade-in="0.3" data-fade-out="0.4" src="assets/sfx/wind.wav"></audio>
+      <audio id="sfx-13" class="clip" data-start="15.3" data-duration="0.35" data-volume="0.9" src="assets/sfx/stamp.wav"></audio>
+      <audio id="sfx-14" class="clip" data-start="17.0" data-duration="0.5" data-volume="0.7" src="assets/sfx/whoosh.wav"></audio>
+      <audio id="sfx-15" class="clip" data-start="19.5" data-duration="2.2" data-volume="1" src="assets/sfx/boom.wav"></audio>
+      <audio id="sfx-16" class="clip" data-start="21.4" data-duration="2.4" data-volume="0.5" data-fade-out="0.3" src="assets/sfx/wind.wav"></audio>
+      <audio id="sfx-17" class="clip" data-start="23.8" data-duration="0.5" data-volume="0.7" src="assets/sfx/whoosh.wav"></audio>
+      <audio id="sfx-18" class="clip" data-start="24.0" data-duration="5.6" data-volume="0.7" data-fade-in="0.5" data-fade-out="0.5" src="assets/sfx/hum.wav"></audio>
+      <audio id="sfx-19" class="clip" data-start="29.6" data-duration="0.5" data-volume="0.8" src="assets/sfx/whoosh.wav"></audio>
+      <audio id="sfx-20" class="clip" data-start="29.9" data-duration="0.5" data-volume="0.4" data-fade-in="0.2" src="assets/sfx/wind.wav"></audio>
+    </div>
+
+    <!-- Shared ground backdrop for the 1 m and 3 m drops -->
+    <svg width="0" height="0" style="position: absolute">
+      <defs>
+        <g id="groundScene">
+          <rect width="1080" height="1920" fill="url(#skyGrad)" />
+          <ellipse cx="160" cy="300" rx="110" ry="40" fill="#e8f0ff" opacity="0.9" />
+          <ellipse cx="880" cy="420" rx="140" ry="46" fill="#e8f0ff" opacity="0.9" />
+          <rect y="1000" width="1080" height="920" fill="#3b7d4f" />
+          <rect y="1000" width="1080" height="26" fill="#56b06f" />
+        </g>
+      </defs>
+    </svg>
+
+    <script>
+      const DUR = 30.4;
+      const $ = (id) => document.getElementById(id);
+      const clamp01 = (x) => Math.max(0, Math.min(1, x));
+      const seg = (t, a, b) => clamp01((t - a) / (b - a));
+      const lerp = (a, b, p) => a + (b - a) * p;
+      const easeOut = (p) => 1 - Math.pow(1 - p, 3);
+      const easeIn = (p) => p * p;
+      const easeInOut = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+      // Periodic over the whole video, so the last frame matches the first.
+      const loopSin = (t, cycles) => Math.sin((2 * Math.PI * cycles * t) / DUR);
+      const fmt = (n) => Math.round(n).toLocaleString('en-US');
+
+      // Seeded PRNG: renders must be deterministic.
+      const rng = (() => {
+        let a = 0x9e3779b9;
+        return () => {
+          a |= 0; a = (a + 0x6d2b79f5) | 0;
+          let t = Math.imul(a ^ (a >>> 15), 1 | a);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      })();
+
+      // ---------- Stickman (same rig as the gravity short) ----------
+      const THIGH = 64, SHIN = 64, TORSO = 112, UPPER = 56, FORE = 54, HEAD_R = 42;
+      const rad = (d) => (d * Math.PI) / 180;
+      const dir = (d) => ({ x: Math.sin(rad(d)), y: Math.cos(rad(d)) });
+      const INK = '#0b1020';
+      const POSES = {
+        stand: { lHip: -8, lKnee: 0, rHip: 8, rKnee: 0, lSh: -18, lEl: -6, rSh: 18, rEl: 6, lean: 0 },
+        jump: { lHip: -22, lKnee: 34, rHip: 26, rKnee: -12, lSh: -150, lEl: -20, rSh: 150, rEl: 20, lean: 0 },
+        land: { lHip: -60, lKnee: 80, rHip: 60, rKnee: -80, lSh: -100, lEl: -10, rSh: 100, rEl: 10, lean: 0 },
+        thumbs: { lHip: -8, lKnee: 0, rHip: 8, rKnee: 0, lSh: -18, lEl: -6, rSh: 90, rEl: 90, lean: 0 },
+        ouch: { lHip: -60, lKnee: 80, rHip: 30, rKnee: -110, lSh: -140, lEl: -30, rSh: 120, rEl: 40, lean: -6 },
+        fall: { lHip: -40, lKnee: 25, rHip: 40, rKnee: -25, lSh: -120, lEl: -25, rSh: 120, rEl: 25, lean: 0 },
+        wave: { lHip: -40, lKnee: 60, rHip: 40, rKnee: -60, lSh: -18, lEl: -6, rSh: 150, rEl: 25, lean: 0 },
+      };
+
+      function stick(p, o = {}) {
+        const { eyes = 'dot', mouth = 'smile', hat = 'bowler', anchor = 'feet', fist = false } = o;
+        const drop = (h, k) => THIGH * dir(h).y + SHIN * dir(h + k).y;
+        const hip = { x: 0, y: anchor === 'feet' ? -Math.max(drop(p.lHip, p.lKnee), drop(p.rHip, p.rKnee)) : 0 };
+        const leg = (a, k) => {
+          const d1 = dir(a), kn = { x: hip.x + THIGH * d1.x, y: hip.y + THIGH * d1.y };
+          const d2 = dir(a + k), ft = { x: kn.x + SHIN * d2.x, y: kn.y + SHIN * d2.y };
+          return `M${hip.x},${hip.y} L${kn.x},${kn.y} L${ft.x},${ft.y}`;
+        };
+        const up = { x: Math.sin(rad(p.lean)), y: -Math.cos(rad(p.lean)) };
+        const neck = { x: hip.x + TORSO * up.x, y: hip.y + TORSO * up.y };
+        const sh = { x: hip.x + (TORSO - 8) * up.x, y: hip.y + (TORSO - 8) * up.y };
+        const head = { x: neck.x + (HEAD_R + 6) * up.x, y: neck.y + (HEAD_R + 6) * up.y };
+        const arm = (s, e) => {
+          const d1 = dir(s + p.lean), el = { x: sh.x + UPPER * d1.x, y: sh.y + UPPER * d1.y };
+          const d2 = dir(s + e + p.lean), hand = { x: el.x + FORE * d2.x, y: el.y + FORE * d2.y };
+          return { d: `M${sh.x},${sh.y} L${el.x},${el.y} L${hand.x},${hand.y}`, hand };
+        };
+        const la = arm(p.lSh, p.lEl), ra = arm(p.rSh, p.rEl);
+        const eye = (side) => {
+          const cx = side * 14, cy = -4;
+          if (eyes === 'x')
+            return `<g stroke="${INK}" stroke-width="4.5" stroke-linecap="round"><line x1="${cx - 6}" y1="${cy - 6}" x2="${cx + 6}" y2="${cy + 6}"/><line x1="${cx - 6}" y1="${cy + 6}" x2="${cx + 6}" y2="${cy - 6}"/></g>`;
+          if (eyes === 'wide')
+            return `<circle cx="${cx}" cy="${cy}" r="11" fill="#fff" stroke="${INK}" stroke-width="3.5"/><circle cx="${cx}" cy="${cy}" r="4.5" fill="${INK}"/>`;
+          return `<circle cx="${cx}" cy="${cy}" r="5.5" fill="${INK}"/>`;
+        };
+        const mouths = {
+          smile: `<path d="M-13,14 Q0,26 13,14" stroke="${INK}" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+          o: `<ellipse cx="0" cy="19" rx="7" ry="9" fill="${INK}"/>`,
+          grit: `<rect x="-14" y="11" width="28" height="13" rx="3" fill="#fff" stroke="${INK}" stroke-width="3.5"/><line x1="-14" y1="17.5" x2="14" y2="17.5" stroke="${INK}" stroke-width="2.5"/>`,
+        };
+        const hats = {
+          bowler: `<g transform="translate(0,${-HEAD_R + 8})"><ellipse cx="0" cy="0" rx="52" ry="10" fill="#e63946" stroke="${INK}" stroke-width="4"/><path d="M-32,-2 C-32,-46 32,-46 32,-2 Z" fill="#e63946" stroke="${INK}" stroke-width="4"/><path d="M-31,-12 L31,-12" stroke="#7a1520" stroke-width="7"/></g>`,
+          helmet: `<circle r="58" fill="rgba(190,225,255,0.28)" stroke="#e9eef5" stroke-width="8"/><path d="M-38,-30 A48,48 0 0,1 10,-50" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity="0.8"/>`,
+          none: '',
+        };
+        const fistMark = fist
+          ? `<circle cx="${ra.hand.x}" cy="${ra.hand.y}" r="11" fill="#fff" stroke="${INK}" stroke-width="3"/><line x1="${ra.hand.x}" y1="${ra.hand.y - 8}" x2="${ra.hand.x}" y2="${ra.hand.y - 26}" stroke="#fff" stroke-width="9" stroke-linecap="round"/>`
+          : '';
+        return `<g stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="${leg(p.lHip, p.lKnee)}"/><path d="${leg(p.rHip, p.rKnee)}"/>
+            <line x1="${hip.x}" y1="${hip.y}" x2="${neck.x}" y2="${neck.y}"/>
+            <path d="${la.d}"/><path d="${ra.d}"/>
+          </g>${fistMark}
+          <g transform="translate(${head.x},${head.y}) rotate(${p.lean})">
+            <circle r="${HEAD_R}" fill="#fff" stroke="${INK}" stroke-width="4"/>
+            ${eye(-1)}${eye(1)}${mouths[mouth] || ''}${hats[hat]}
+          </g>`;
+      }
+
+      // ---------- Static art built once ----------
+      (function buildStatic() {
+        let s = '';
+        for (let i = 0; i < 70; i++) s += `<circle cx="${rng() * 1080}" cy="${rng() * 1500}" r="${1.5 + rng() * 2.5}" fill="#fff"/>`;
+        $('stars').innerHTML = s;
+        let s2 = '';
+        for (let i = 0; i < 110; i++) s2 += `<circle cx="${rng() * 1080}" cy="${rng() * 1920}" r="${1.5 + rng() * 2.5}" fill="#fff" opacity="${0.4 + rng() * 0.5}"/>`;
+        $('issStars').innerHTML = s2;
+
+        $('clouds').innerHTML = [0, 1, 2, 3, 4]
+          .map((i) => `<g id="cloud${i}"><ellipse cx="0" cy="0" rx="120" ry="44" fill="#eef4ff"/><ellipse cx="-80" cy="14" rx="74" ry="34" fill="#eef4ff"/><ellipse cx="86" cy="14" rx="80" ry="34" fill="#eef4ff"/></g>`)
+          .join('');
+        $('speedlines').innerHTML = Array.from({ length: 16 }, (_, i) => `<line id="sl${i}" x1="0" y1="0" x2="0" y2="0"/>`).join('');
+
+        let w = '';
+        for (let f = 0; f < 5; f++) {
+          for (let c = 0; c < 3; c++) {
+            const y = -500 + 60 + f * 300;
+            w += `<rect x="${140 + c * 110}" y="${y}" width="80" height="150" fill="#ffe7a6" stroke="#0b1020" stroke-width="5"/>`;
+          }
+        }
+        $('windows').innerHTML = w;
+
+        $('jet').innerHTML = `<g id="jetBody" transform="translate(-400,880) scale(0.9)">
+            <path d="M-150,-70 C-150,-100 -120,-104 -90,-104 L140,-104 C176,-104 196,-86 196,-70 C196,-54 176,-40 140,-40 L-120,-40 C-140,-40 -150,-52 -150,-70 Z" fill="#eef2f8" stroke="${INK}" stroke-width="5"/>
+            <path d="M-150,-70 L-176,-150 L-140,-150 L-104,-100" fill="#eef2f8" stroke="${INK}" stroke-width="5"/>
+            <path d="M-120,-62 L160,-62" stroke="#2f6fd6" stroke-width="8"/>
+            <path d="M20,-58 L-50,0 L-14,0 L64,-50 Z" fill="#c9d3e3" stroke="${INK}" stroke-width="5"/>
+            <text x="20" y="-130" fill="#fff" font-family="Inter" font-weight="900" font-size="34" text-anchor="middle">AIRLINERS FLY AT ~10 km</text>
+          </g>`;
+
+        $('tail').innerHTML = `<g id="tailBody" opacity="0">
+            <path d="M-120,40 L60,40 C90,40 110,20 110,0 C110,-20 90,-40 60,-40 L-60,-40 Z" fill="#dfe6ef" stroke="${INK}" stroke-width="6"/>
+            <path d="M-60,-40 L-120,-190 L-60,-190 L20,-40 Z" fill="#dfe6ef" stroke="${INK}" stroke-width="6"/>
+            <path d="M-96,-130 L-50,-130" stroke="#e63946" stroke-width="16"/>
+            <path d="M-120,40 L-150,70 L-150,10 Z" fill="#9aa5b8" stroke="${INK}" stroke-width="6"/>
+          </g>`;
+
+        $('arrows').innerHTML = `
+          <g id="gravArrow" transform="translate(770,560)"><g id="gravScale">
+            <line x1="0" y1="0" x2="0" y2="230" stroke="#e63946" stroke-width="22" stroke-linecap="round"/>
+            <path d="M-34,210 L0,270 L34,210 Z" fill="#e63946"/></g>
+            <text x="0" y="-24" fill="#fff" font-family="Anton" font-size="50" text-anchor="middle" stroke="${INK}" stroke-width="10" paint-order="stroke">GRAVITY</text>
+          </g>
+          <g id="airArrow" transform="translate(310,830)"><g id="airScale">
+            <line x1="0" y1="0" x2="0" y2="-230" stroke="#5be0ff" stroke-width="22" stroke-linecap="round"/>
+            <path d="M-34,-210 L0,-270 L34,-210 Z" fill="#5be0ff"/></g>
+            <text x="0" y="74" fill="#fff" font-family="Anton" font-size="50" text-anchor="middle" stroke="${INK}" stroke-width="10" paint-order="stroke">AIR</text>
+          </g>`;
+
+        $('booms').innerHTML = [0, 1, 2].map((i) => `<circle id="boom${i}" cx="540" cy="680" r="0" stroke-width="10" opacity="0"/>`).join('');
+
+        $('coin').innerHTML = `<g transform="translate(540,600)"><g id="coinFace">
+            <circle r="150" fill="#ffd23f" stroke="${INK}" stroke-width="10"/>
+            <circle r="118" fill="none" stroke="#c99a1d" stroke-width="8"/>
+            <text id="coinText" y="34" fill="${INK}" font-family="Anton" font-size="96" text-anchor="middle">LIVE</text></g></g>`;
+
+        $('dust').innerHTML = [-120, -60, 0, 60, 120]
+          .map((dx, i) => `<circle cx="${560 + dx}" cy="${990 - (i % 2) * 20}" r="${44 + (i % 3) * 14}" fill="#d9cdb4"/>`)
+          .join('');
+
+        $('station').innerHTML = `<g id="stationBody">
+            <rect x="-90" y="-12" width="180" height="24" fill="#cfd6e2" stroke="${INK}" stroke-width="5"/>
+            <rect x="-150" y="-60" width="70" height="120" fill="#2f6fd6" stroke="${INK}" stroke-width="5"/>
+            <rect x="80" y="-60" width="70" height="120" fill="#2f6fd6" stroke="${INK}" stroke-width="5"/>
+            <rect x="-28" y="-30" width="56" height="60" rx="10" fill="#eef2f8" stroke="${INK}" stroke-width="5"/>
+            <g transform="translate(0,-34) scale(0.36)">${stick(POSES.wave, { mouth: 'smile' })}</g>
+          </g>
+          <g id="issArrows">
+            <g id="sideArrow"><line x1="70" y1="0" x2="230" y2="0" stroke="#5be0ff" stroke-width="16" stroke-linecap="round"/><path d="M220,-26 L270,0 L220,26 Z" fill="#5be0ff"/></g>
+            <g id="downArrow"><line x1="0" y1="60" x2="0" y2="170" stroke="#e63946" stroke-width="16" stroke-linecap="round"/><path d="M-26,160 L0,210 L26,160 Z" fill="#e63946"/></g>
+          </g>`;
+
+        // Speedometer: 0-300 km/h across a half dial, red zone from terminal velocity.
+        const CX = 540, CY = 1270, R = 230;
+        const ang = (v) => -90 + (Math.min(v, 300) / 300) * 180;
+        const pt = (deg, r) => [CX + r * Math.sin(rad(deg)), CY - r * Math.cos(rad(deg))];
+        let g = `<g id="gaugeBody">
+          <path d="M${CX - R - 30},${CY} A${R + 30},${R + 30} 0 0,1 ${CX + R + 30},${CY} Z" fill="rgba(8,12,30,0.86)" stroke="rgba(255,255,255,0.2)" stroke-width="4"/>`;
+        const [rx0, ry0] = pt(ang(195), R - 6), [rx1, ry1] = pt(90, R - 6);
+        g += `<path d="M${rx0},${ry0} A${R - 6},${R - 6} 0 0,1 ${rx1},${ry1}" fill="none" stroke="rgba(230,57,70,0.75)" stroke-width="26"/>`;
+        for (let v = 0; v <= 300; v += 25) {
+          const major = v % 50 === 0;
+          const [a, b] = pt(ang(v), R - (major ? 40 : 26)), [c, d] = pt(ang(v), R - 6);
+          g += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="#fff" stroke-width="${major ? 6 : 3}" opacity="0.85"/>`;
+          if (v % 100 === 0) {
+            const [tx, ty] = pt(ang(v), R - 72);
+            g += `<text x="${tx}" y="${ty + 10}" fill="rgba(255,255,255,0.75)" font-family="Inter" font-weight="800" font-size="26" text-anchor="middle">${v}</text>`;
+          }
+        }
+        const [m0, m1] = pt(ang(195), R - 52), [m2, m3] = pt(ang(195), R + 22);
+        const [ml, mll] = pt(ang(195), R + 52);
+        g += `<line id="maxLine" x1="${m0}" y1="${m1}" x2="${m2}" y2="${m3}" stroke="#e63946" stroke-width="10" stroke-linecap="round"/>
+          <text x="${ml}" y="${mll}" fill="#e63946" font-family="Anton" font-size="34" text-anchor="middle" stroke="${INK}" stroke-width="8" paint-order="stroke">MAX</text>
+          <g id="needle"><line x1="${CX}" y1="${CY}" x2="${CX}" y2="${CY - R + 30}" stroke="${INK}" stroke-width="16" stroke-linecap="round"/>
+            <line x1="${CX}" y1="${CY}" x2="${CX}" y2="${CY - R + 30}" stroke="#ffd23f" stroke-width="9" stroke-linecap="round"/></g>
+          <circle cx="${CX}" cy="${CY}" r="18" fill="#ffd23f" stroke="${INK}" stroke-width="5"/>
+          <text id="speedText" x="${CX}" y="${CY - 50}" fill="#fff" font-family="Anton" font-size="62" text-anchor="middle" stroke="${INK}" stroke-width="10" paint-order="stroke">195 km/h</text>
+        </g>`;
+        $('gauge').innerHTML = g;
+        window.__gaugeAngle = ang;
+      })();
+
+      // ---------- Numbers over time ----------
+      function heightAt(t) {
+        if (t < 2.6) return 450;
+        if (t < 3.5) return 1;
+        if (t < 4.5) return 3;
+        if (t < 6.4) return 15;
+        if (t < 11.4) return lerp(15, 450, easeOut(seg(t, 6.4, 8.0)));
+        if (t < 14.0) return lerp(450, 10000, easeInOut(seg(t, 11.4, 13.6)));
+        if (t < 17.0) return 10160;
+        if (t < 23.8) return lerp(10160, 38969, easeOut(seg(t, 17.0, 17.5)));
+        if (t < 30.0) return 400000;
+        return 450;
+      }
+      function speedAt(t) {
+        if (t < 2.6) return 195;
+        if (t < 3.5) return 16 * seg(t, 2.72, 3.17);
+        if (t < 4.5) return 28 * seg(t, 3.62, 4.17);
+        if (t < 6.4) return 62 * seg(t, 4.6, 5.6);
+        if (t < 8.0) return lerp(62, 195, 1 - Math.pow(1 - seg(t, 6.4, 8.0), 2.2));
+        if (t < 17.0) return 195 + (t > 11.4 && t < 14 ? 1.5 * Math.sin(t * 41) : 0);
+        if (t < 21.4) return lerp(195, 1357.6, easeIn(seg(t, 17.6, 19.8)));
+        if (t < 23.8) return lerp(1357.6, 195, easeOut(seg(t, 21.4, 23.0)));
+        if (t < 24.1) return 195;
+        if (t < 29.8) return 27600;
+        return 195;
+      }
+      const fmtHeight = (m) => (m >= 100000 ? `${fmt(m / 1000)} km` : `${fmt(m)} m`);
+
+      const DAY = [[47, 128, 237], [168, 220, 255]];
+      const HIGH = [[21, 70, 160], [90, 162, 255]];
+      const STRATO = [[2, 3, 12], [20, 43, 107]];
+      const mix = (a, b, p) => a.map((c, i) => c.map((v, j) => Math.round(lerp(v, b[i][j], p))));
+      function skyAt(t) {
+        let s = DAY;
+        s = mix(s, HIGH, easeInOut(seg(t, 11.4, 13.0)));
+        s = mix(s, STRATO, easeInOut(seg(t, 17.0, 17.8)));
+        s = mix(s, DAY, easeInOut(seg(t, 21.4, 22.6)));
+        return s;
+      }
+
+      // ---------- Per-frame render ----------
+      function render(t) {
+        // HUD
+        $('hval').textContent = fmtHeight(heightAt(t));
+        const v = speedAt(t);
+        const over = v > 300;
+        const needle = over ? 93 + 3 * Math.sin(t * 70) : window.__gaugeAngle(v);
+        $('needle').setAttribute('transform', `rotate(${needle} 540 1270)`);
+        $('speedText').textContent = `${fmt(v)} km/h`;
+        $('speedText').setAttribute('fill', v > 200 ? '#ff6b75' : '#ffffff');
+        const thunk = t > 8.0 && t < 8.35 ? 14 * Math.exp(-(t - 8.0) / 0.07) * Math.sin(t * 160) : 0;
+        const boomShake = t > 19.5 && t < 20.0 ? 18 * Math.exp(-(t - 19.5) / 0.1) * Math.sin(t * 140) : 0;
+        const gaugeOn = 1 - seg(t, 23.8, 24.1) + seg(t, 29.8, 30.2);
+        $('gaugeBody').setAttribute('transform', `translate(${thunk + boomShake},0)`);
+        $('gaugeBody').setAttribute('opacity', clamp01(gaugeOn));
+
+        // Sky
+        const [top, bot] = skyAt(t);
+        $('skyTop').setAttribute('stop-color', `rgb(${top})`);
+        $('skyBot').setAttribute('stop-color', `rgb(${bot})`);
+        const strato = seg(t, 17.0, 17.8) * (1 - seg(t, 21.4, 22.6));
+        $('stars').setAttribute('opacity', strato);
+        $('earthCurve').setAttribute('opacity', strato);
+
+        // Clouds and speed lines drift up as we fall; both wrap a whole number of times per video.
+        const cloudOpacity = 0.92 * (1 - strato) * (t > 11.4 && t < 17.0 ? 0.75 : 1);
+        for (let i = 0; i < 5; i++) {
+          const y = ((((i * 520 + 300 - (t * 2600 * 10) / DUR) % 2600) + 2600) % 2600) - 300;
+          const x = [160, 860, 420, 980, 120][i];
+          const el = $('cloud' + i);
+          el.setAttribute('transform', `translate(${x},${y}) scale(${[1, 0.8, 0.7, 1.1, 0.9][i]})`);
+          el.setAttribute('opacity', cloudOpacity);
+        }
+        const fast = t > 17.6 && t < 21.4 ? 1.6 : 1;
+        const lineLen = (60 + 220 * Math.min(1, v / 195)) * fast;
+        for (let i = 0; i < 16; i++) {
+          const x = 40 + ((i * 397) % 1000);
+          const y = ((((i * 151 - (t * 2400 * 28) / DUR) % 2400) + 2400) % 2400) - 240;
+          const el = $('sl' + i);
+          el.setAttribute('x1', x); el.setAttribute('x2', x);
+          el.setAttribute('y1', y); el.setAttribute('y2', y + lineLen);
+          el.setAttribute('stroke-width', 5 + (i % 3) * 2);
+          el.setAttribute('opacity', 0.35 * (t < 14.0 || t > 17.0 ? 1 : 0.6));
+        }
+
+        // The faller
+        const helmet = t >= 17.0 && t < 23.8;
+        const fallerOn = !(t >= 14.0 && t < 17.0);
+        const tumble = 9 * loopSin(t, 6) + (t > 19.5 && t < 20.2 ? 10 * Math.sin(t * 50) : 0);
+        const flap = 10 * loopSin(t, 30);
+        const pose = { ...POSES.fall, lSh: POSES.fall.lSh - flap, rSh: POSES.fall.rSh + flap };
+        const scared = t > 6.4 && t < 14.0;
+        $('faller').setAttribute('opacity', fallerOn ? 1 : 0);
+        $('faller').innerHTML = `<g transform="translate(540,680) rotate(${tumble}) scale(1.15)">${stick(pose, {
+          anchor: 'hip', hat: helmet ? 'helmet' : 'bowler', eyes: scared || helmet ? 'wide' : 'dot', mouth: scared ? 'grit' : 'o',
+        })}</g>`;
+
+        // Airliner passing at 10 km
+        const jp = seg(t, 12.2, 13.9);
+        $('jetBody').setAttribute('transform', `translate(${lerp(-400, 1500, jp)},${985 + 12 * Math.sin(jp * 6)}) scale(0.9)`);
+
+        // Vulović's tail section
+        const tp = seg(t, 14.0, 14.7);
+        $('tailBody').setAttribute('opacity', t >= 14.0 && t < 17.0 ? 1 : 0);
+        $('tailBody').setAttribute('transform', `translate(540,${lerp(-300, 680, easeOut(tp)) + (t - 14.7 > 0 ? (t - 14.7) * 25 : 0)}) rotate(${t * 140})`);
+
+        // Air vs gravity arrows
+        const arrowsOn = t >= 8.6 && t < 11.4;
+        $('arrows').setAttribute('opacity', arrowsOn ? 1 : 0);
+        $('gravScale').setAttribute('transform', `scale(1,${easeOut(seg(t, 8.65, 8.95))})`);
+        $('airScale').setAttribute('transform', `scale(1,${easeInOut(seg(t, 9.0, 10.3))})`);
+
+        // Sonic boom rings
+        for (let i = 0; i < 3; i++) {
+          const p = seg(t, 19.5 + i * 0.12, 20.5 + i * 0.12);
+          const el = $('boom' + i);
+          el.setAttribute('r', 60 + p * 900);
+          el.setAttribute('opacity', p > 0 && p < 1 ? 1 - p : 0);
+        }
+
+        // 1 m and 3 m drops
+        const pose1 = t < 2.72 ? ['stand', {}] : t < 3.17 ? ['jump', { eyes: 'wide', mouth: 'o' }] : t < 3.27 ? ['land', {}] : ['thumbs', { fist: true }];
+        $('man1pose').innerHTML = stick(POSES[pose1[0]], pose1[1]);
+        const pose2 = t < 3.62 ? ['stand', { mouth: 'grit' }] : t < 4.17 ? ['jump', { eyes: 'wide', mouth: 'o' }] : ['ouch', { eyes: 'wide', mouth: 'grit' }];
+        $('man2pose').innerHTML = stick(POSES[pose2[0]], pose2[1]);
+        $('crack').setAttribute('opacity', t >= 4.19 ? 1 : 0);
+
+        // 15 m drop: the camera follows him down the building, then the coin
+        const fp = easeIn(seg(t, 4.6, 5.6));
+        const manY = lerp(-500, 1000, fp);
+        const manX = lerp(430, 600, seg(t, 4.6, 5.6));
+        const cam = Math.max(0, Math.min(1060, 640 - manY));
+        const hit = t > 5.6 && t < 5.9 ? 16 * Math.exp(-(t - 5.6) / 0.08) * Math.sin(t * 150) : 0;
+        $('world3').setAttribute('transform', `translate(${hit},${cam})`);
+        const pose3 = t < 4.6 ? ['stand', { mouth: 'grit' }] : t < 5.6 ? ['jump', { eyes: 'wide', mouth: 'o' }] : ['land', { eyes: 'x', mouth: 'o' }];
+        $('man3').innerHTML = `<g transform="translate(${manX},${manY}) scale(0.62)">${stick(POSES[pose3[0]], pose3[1])}</g>`;
+        const dp = seg(t, 5.6, 6.1);
+        $('dust').setAttribute('opacity', dp > 0 ? 1 - dp : 0);
+        $('dust').setAttribute('transform', `translate(${560 * (1 - (1 + dp))}, ${990 * (1 - (1 + dp * 0.3))}) scale(${1 + dp}, ${1 + dp * 0.3})`);
+        const cp = seg(t, 5.65, 5.8);
+        const spin = Math.cos(Math.max(0, t - 5.65) * 26);
+        $('coin').setAttribute('opacity', cp);
+        $('coinFace').setAttribute('transform', `scale(${spin * easeOut(cp)},${easeOut(cp)})`);
+        $('coinText').textContent = spin >= 0 ? 'LIVE' : 'DIE';
+        $('coinText').setAttribute('transform', spin < 0 ? 'scale(-1,1)' : '');
+
+        // Space Station
+        const theta = lerp(-150, 160, seg(t, 23.8, 29.7));
+        const th = rad(theta);
+        const OR = 340, OCY = 720;
+        const sx = 540 + OR * Math.cos(th), sy = OCY + OR * Math.sin(th);
+        $('station').setAttribute('transform', `translate(${sx},${sy}) rotate(${theta + 90})`);
+        const a0 = rad(-150);
+        const large = theta - -150 > 180 ? 1 : 0;
+        $('trail').setAttribute('d', theta > -149 ? `M${540 + OR * Math.cos(a0)},${OCY + OR * Math.sin(a0)} A${OR},${OR} 0 ${large},1 ${sx},${sy}` : '');
+        const stationOn = 1 - seg(t, 29.45, 29.65);
+        $('station').setAttribute('opacity', stationOn);
+        $('trail').setAttribute('opacity', stationOn);
+        $('downArrow').setAttribute('opacity', seg(t, 25.0, 25.2));
+        $('sideArrow').setAttribute('opacity', seg(t, 26.6, 26.8));
+        const dive = easeIn(seg(t, 29.6, 30.4));
+        $('issWorld').setAttribute('transform', `translate(540,500) scale(${1 + dive * 9}) translate(-540,-500)`);
+        $('iss').style.opacity = 1 - seg(t, 29.95, 30.35);
+
+        // White flashes on hard cuts
+        const flashAt = (s, d, peak) => (t >= s && t < s + d ? peak * (1 - (t - s) / d) : 0);
+        $('flash').style.opacity = Math.max(flashAt(5.6, 0.15, 0.6), flashAt(6.4, 0.1, 0.5), flashAt(19.5, 0.2, 0.55), flashAt(23.8, 0.1, 0.5));
+      }
+
+      // ---------- Timeline ----------
+      const tl = gsap.timeline({ paused: true });
+      tl.to({}, { duration: DUR, ease: 'none', onUpdate: () => render(tl.time()) }, 0);
+
+      // Ground drops
+      tl.fromTo('#man1', { x: 385, y: 835 }, { x: 385, y: 835, duration: 0.12 }, 2.6);
+      tl.to('#man1', { x: 600, duration: 0.45, ease: 'none' }, 2.72);
+      tl.to('#man1', { y: 1000, duration: 0.45, ease: 'power2.in' }, 2.72);
+      tl.fromTo('#man2', { x: 330, y: 505 }, { x: 330, y: 505, duration: 0.12 }, 3.5);
+      tl.to('#man2', { x: 600, duration: 0.55, ease: 'none' }, 3.62);
+      tl.to('#man2', { y: 1000, duration: 0.55, ease: 'power2.in' }, 3.62);
+      tl.set('#crack', { x: 640, y: 960 }, 3.5);
+
+      // Pop-ins for callouts and captions
+      const pop = (sel, at) => tl.fromTo(sel, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.18, ease: 'back.out(2.2)' }, at);
+      document.querySelectorAll('.cap').forEach((el) => {
+        const at = parseFloat(el.dataset.start);
+        if (at > 0) tl.fromTo(el.firstElementChild, { scale: 0.88, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.14, ease: 'back.out(2)' }, at);
+      });
+      [['#c-ok .chip', 3.25], ['#c-ouch .chip', 4.2], ['#c-flip .chip', 5.65], ['#c-equal .chip', 10.3], ['#c-still .chip', 12.6], ['#c-felix .chip', 17.1], ['#c-fall-1', 25.0]].forEach(([s, at]) => pop(s, at));
+      tl.fromTo('#c-fall-2', { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.18, ease: 'back.out(2.2)' }, 26.6);
+      tl.fromTo('#c-vul > div', { y: -40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25, ease: 'power3.out' }, 14.2);
+      ['#c-max .stamp', '#c-record .stamp', '#c-mach .stamp'].forEach((s, i) =>
+        tl.fromTo(s, { scale: 2.2, opacity: 0, rotation: -10 }, { scale: 1, opacity: 1, rotation: -10, duration: 0.16, ease: 'power3.in' }, [8.0, 15.3, 19.5][i]),
+      );
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines['main'] = tl;
+      tl.seek(0);
+      render(0);
+    </script>
+  </body>
+</html>
