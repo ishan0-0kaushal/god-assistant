@@ -5,9 +5,9 @@
   "height": 1920,
   "voice": {
     "provider": "elevenlabs",
-    "voice_id": "onwK4e9ZLuTAKqWW03F9",
-    "voice_name": "Daniel - Steady Broadcaster",
-    "model_id": "eleven_multilingual_v2",
+    "voice_id": "q0IMILNRPxOgtBTS4taI",
+    "voice_name": "Drew - Casual, Curious & Fun (channel voice)",
+    "model_id": "eleven_v4_turbo",
     "settings": { "stability": 0.8, "similarity_boost": 0.75, "style": 0.0, "use_speaker_boost": true, "speed": 1.0 }
   },
   "pacing": {

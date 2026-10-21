@@ -16,15 +16,7 @@ ROOT = Path(__file__).resolve().parent
 API = "https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format=mp3_44100_128"
 
 
-def tts(text, prev_text, next_text, voice_cfg, voice_id, key):
-    body = {
-        "text": text,
-        "model_id": voice_cfg["model_id"],
-        "voice_settings": voice_cfg["settings"],
-        # Neighbouring lines keep prosody consistent across the separate requests.
-        "previous_text": prev_text,
-        "next_text": next_text,
-    }
+def post(body, voice_id, key):
     req = urllib.request.Request(
         API.format(voice=voice_id),
         data=json.dumps(body).encode(),
@@ -33,11 +25,25 @@ def tts(text, prev_text, next_text, voice_cfg, voice_id, key):
     )
     try:
         with urllib.request.urlopen(req, timeout=120) as resp:
-            return json.loads(resp.read())
+            return json.loads(resp.read()), None
     except urllib.error.HTTPError as e:
-        sys.exit(f"ElevenLabs returned {e.code}: {e.read().decode(errors='replace')[:500]}")
+        return None, (e.code, e.read().decode(errors="replace")[:500])
     except urllib.error.URLError as e:
         sys.exit(f"Could not reach api.elevenlabs.io: {e.reason}")
+
+
+def tts(text, prev_text, next_text, voice_cfg, voice_id, key):
+    body = {"text": text, "model_id": voice_cfg["model_id"], "voice_settings": voice_cfg["settings"]}
+    # Neighbouring lines keep prosody consistent across the separate requests.
+    stitched = dict(body, previous_text=prev_text, next_text=next_text)
+    res, err = post(stitched, voice_id, key)
+    if err and err[0] in (400, 422):
+        # Some models reject request stitching; failed requests are not billed, so retry plain.
+        print(f"  stitching rejected ({err[0]}), retrying without previous/next text")
+        res, err = post(body, voice_id, key)
+    if err:
+        sys.exit(f"ElevenLabs returned {err[0]}: {err[1]}")
+    return res
 
 
 def main():
