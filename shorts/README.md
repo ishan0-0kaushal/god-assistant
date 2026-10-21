@@ -37,5 +37,9 @@ ElevenLabs sound effects with the same key.
   become a template. In HyperFrames the same things are copy-paste HTML/JS.
 - **Tooling:** HyperFrames' lint caught audio that would have rendered silent, and its `snapshot`
   contact sheets made review fast. Its defaults load GSAP from a CDN, which had to be vendored here.
-- **Speed:** ~55 s (Remotion) vs ~85 s (HyperFrames) for a 30 s render on 4 cores.
+- **Quality:** the same. Both draw frames in headless Chrome and encode with x264. With matched
+  settings (lossless frames, CRF 15, slow preset, BT.709) a test card scored SSIM 0.989 (Remotion)
+  vs 0.987 (HyperFrames) against a lossless reference at the same bitrate: a tie. Both can render
+  at 2x density for a 4K upload (`--scale=2` / `--resolution portrait-4k`).
+- **Speed at matched quality:** ~1m40s (Remotion) vs ~1m20s (HyperFrames) for a 30 s render on 4 cores.
 - **Pick for the daily template:** Remotion.

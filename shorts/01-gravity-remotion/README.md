@@ -11,7 +11,7 @@ REMOTION_BROWSER_EXECUTABLE=/path/to/chrome-headless-shell npx remotion render G
 
 `REMOTION_BROWSER_EXECUTABLE` is only needed where Remotion can't download its own Chrome (the cloud
 container uses `/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell`).
-A 30 s render takes about a minute on 4 cores. `./scripts/stills.sh <frames...>` renders review stills
+A 30 s render takes about 1m40s on 4 cores (PNG frames, CRF 15, slow preset, BT.709; see `remotion.config.ts`). `./scripts/stills.sh <frames...>` renders review stills
 and `./scripts/sheet.sh` tiles them.
 
 ## Where things live
