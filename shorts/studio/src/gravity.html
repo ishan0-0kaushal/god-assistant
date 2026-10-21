@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>What if gravity doubled every second?</title>
+    <link rel="stylesheet" href="kit/kit.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <script src="kit/land-dots.js"></script>
+    <script src="kit/kit.js"></script>
+    <!-- @timing -->
+    <style>
+      #title { top: 236px; }
+      #title .title-big { font-size: 128px; margin-top: 10px; }
+      #titlePill { position: absolute; top: 500px; }
+      #clock { top: 210px; }
+      #clock .num { font-size: 210px; color: #fff; text-shadow: 0 0 26px rgba(255, 255, 255, 0.45); }
+      #clock .num b { color: var(--red); text-shadow: 0 0 26px rgba(248, 40, 56, 0.9); font-weight: 400; }
+      #bigG { top: 190px; }
+      #sunG { top: 900px; }
+      #escape { top: 236px; }
+      #escape .num { font-size: 210px; }
+      #escape .unit { font-size: 90px; }
+      #escLabel { font: 800 30px var(--ui); color: var(--cyan); letter-spacing: 1px; text-shadow: 0 0 16px rgba(64, 216, 232, 0.6); }
+      #gChip { left: 60px; top: 1215px; }
+      #sunPill { position: absolute; top: 300px; left: 520px; }
+      #bars { top: 330px; }
+      #lightBars { top: 1232px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="{{DURATION}}" data-width="1080" data-height="1920">
+      <canvas id="bg" class="layer" width="1080" height="1920"></canvas>
+
+      <div id="scene" class="layer">
+        <canvas id="globe" class="layer" width="1080" height="1920"></canvas>
+        <canvas id="fx" class="layer" width="1080" height="1920"></canvas>
+        <svg id="stage" class="layer" viewBox="0 0 1080 1920"></svg>
+
+        <div id="title" class="title">
+          <div class="title-small">WHAT IF</div>
+          <div class="title-big">GRAVITY <span class="red">DOUBLED?</span></div>
+        </div>
+        <div class="center-x" id="titlePillWrap" style="position: absolute; top: 500px">
+          <div class="pill"><span class="dot"></span>EARTH'S GRAVITY <span class="val" id="titleVal">1,073,741,824</span> G</div>
+        </div>
+        <div id="clock" class="counter"><span class="num" id="clockNum">00:00:0<b>0</b></span></div>
+        <div id="bigG" class="counter"><span class="num glow-coral" id="bigGNum">8</span><span class="unit">G</span></div>
+        <div id="sunG" class="counter"><span class="num glow-coral" id="sunGNum">32</span><span class="unit">G</span></div>
+        <div id="escLabelWrap" class="center-x" style="position: absolute; top: 205px"><div id="escLabel">SPEED NEEDED TO LEAVE EARTH</div></div>
+        <div id="escape" class="counter"><span class="num glow-orange" id="escNum">11</span><span class="unit">KM/S</span></div>
+        <div id="sunPill" class="pill"><span class="dot" style="background: #ffb347; box-shadow: 0 0 10px #ffb347"></span>SUN'S SURFACE <span class="val">28</span> G</div>
+        <div id="passed" class="stamp" style="top: 360px; left: 640px"><span class="v">PASSED</span></div>
+
+        <div id="youTag" class="tag"><div class="k">YOU</div><div class="v" id="youTagVal">140 KG</div></div>
+        <div id="gChip" class="chip"><div class="k"><span class="dot" style="width: 10px; height: 10px; border-radius: 50%; background: var(--cyan)"></span>GRAVITY</div><div class="v" id="gChipVal">2 G</div></div>
+        <div id="shoutTwin" class="shout">GET OFF ME!</div>
+        <div id="shoutGhost" class="shout">I'M FINE.</div>
+
+        <div id="bars" class="bars">
+          <div class="bar-row"><div class="bar-head"><span>YOUR BODY</span><span class="n" id="youVal">9 t</span></div><div class="bar-track"><div class="bar-fill" id="youFill" style="background: linear-gradient(90deg, #ff5060, #ff9b45)"></div></div></div>
+          <div class="bar-row"><div class="bar-head"><span id="objName">ELEPHANT</span><span class="n" id="objVal" style="color: var(--cyan)">~6 t</span></div><div class="bar-track"><div class="bar-fill" id="objFill" style="background: linear-gradient(90deg, #2a7fff, #40d8e8)"></div></div></div>
+        </div>
+        <div id="lightBars" class="bars">
+          <div class="bar-row"><div class="bar-head"><span>ESCAPE SPEED</span><span class="n" id="lbEsc">11 km/s</span></div><div class="bar-track"><div class="bar-fill" id="lbEscFill" style="background: linear-gradient(90deg, #ff9b45, #fff1c2)"></div></div></div>
+          <div class="bar-row"><div class="bar-head"><span>LIGHT</span><span class="n" style="color: var(--cyan)">299,792 km/s</span></div><div class="bar-track"><div class="bar-fill" style="width: 100%; background: linear-gradient(90deg, #2a7fff, #40d8e8)"></div></div></div>
+        </div>
+
+        <div id="infoSun" class="info" style="top: 1280px"><span class="ico">≈</span>HEAVIER THAN THE <span class="hl" style="color: var(--orange)">SUN'S SURFACE</span></div>
+        <div id="infoSea" class="info blue" style="top: 1280px"><span class="ico" style="color: var(--blue)">≈</span>AIR PRESSURE: <span class="hl">10 KM UNDER THE SEA</span></div>
+        <div id="infoLight" class="info cyan" style="top: 1300px"><span class="ico" style="color: var(--cyan)">≈</span>TO LEAVE: <span class="hl">FASTER THAN LIGHT</span></div>
+      </div>
+
+      <div id="tunnel" class="layer" style="opacity: 0"></div>
+      <div class="vignette"></div>
+      <div id="hud" class="layer"></div>
+      <div id="caps" class="layer"></div>
+      <div id="bands" class="bands"></div>
+      <div id="flash" class="flash"></div>
+
+      <!-- @audio -->
+    </div>
+
+    <script>
+      const T = window.TIMING;
+      const B = T.beats;
+      const DUR = T.duration;
+      const FPS = 30;
+      const {seg, lerp, ease, fmt, pop, apply} = K;
+      const $ = (id) => document.getElementById(id);
+
+      // ---------- The numbers ----------
+      const SIM = {start: 0, g2: 1, g8: 3, sun: 5, elephant: 7, ocean: 10, jet: 14, eiffel: 18, titanic: 20, empire: 23, pyramid: 27};
+      const HOLE_SIM = Math.log2((299792.458 / 11.186) ** 2);
+      const ORDER = ['start', 'g2', 'g8', 'sun', 'elephant', 'ocean', 'jet', 'eiffel', 'titanic', 'empire', 'pyramid'];
+      function simAt(t) {
+        if (t < B.rewind) return 30;
+        if (t < B.start) return lerp(30, 0, ease.in(seg(t, B.rewind, B.start)));
+        if (t >= B.end) return lerp(HOLE_SIM, 30, ease.out(seg(t, B.end, B.end + 0.6)));
+        if (t >= B.light) return lerp(SIM.pyramid, HOLE_SIM, Math.pow(seg(t, B.light, B.end - 0.3), 2));
+        let i = ORDER.length - 1;
+        while (i > 0 && t < B[ORDER[i]]) i--;
+        const prev = i > 0 ? SIM[ORDER[i - 1]] : 0;
+        return lerp(prev, SIM[ORDER[i]], ease.out(seg(t, B[ORDER[i]], B[ORDER[i]] + 0.45)));
+      }
+      const gAt = (t) => 2 ** simAt(t);
+      const escAt = (t) => 11.186 * 2 ** (simAt(t) / 2);
+      const weight = (kg) => (kg < 1000 ? `${fmt(kg)} KG` : kg < 1e9 ? `${fmt(kg / 1000)} t` : `${(kg / 1e9).toFixed(1)} MILLION t`);
+      const gText = (g) => (g < 10 ? `${Math.round(g * 10) / 10}` : fmt(g));
+
+      // ---------- Camera: one globe, zoomed between "planet" and "ground" ----------
+      const GLOBE = {cx: 540, cy: 880, r: 330};
+      const GROUND = {r: 2600, horizon: 1180};
+      // 0 = planet view, 1 = ground view.
+      function zoomAt(t) {
+        if (t < B.g2) return 0;
+        if (t < B.sun) return ease.inOut(seg(t, B.g2, B.g2 + 0.65));
+        if (t < B.elephant) return 0;
+        if (t < B.light) return 1;
+        return 1 - ease.inOut(seg(t, B.light, B.light + 0.8));
+      }
+      // Spin is integrated from a rate so it stays continuous through the zooms.
+      const SPIN = new Float32Array(DUR * FPS + 2);
+      (() => {
+        let s = 60;
+        for (let f = 0; f < SPIN.length; f++) {
+          SPIN[f] = s;
+          const z = zoomAt(f / FPS);
+          s += lerp(7, 1.4, z) / FPS;
+        }
+      })();
+      const spinAt = (t) => SPIN[Math.min(SPIN.length - 1, Math.max(0, Math.round(t * FPS)))];
+      function viewAt(t) {
+        const z = zoomAt(t);
+        const r = GLOBE.r * Math.pow(GROUND.r / GLOBE.r, z);
+        const horizon = lerp(GLOBE.cy - GLOBE.r, GROUND.horizon, z);
+        return {cx: 540, cy: horizon + r, r, spin: spinAt(t), tilt: 20, dot: Math.min(16, Math.max(1.8, r * 0.0068)), zoom: z};
+      }
+
+      // ---------- Scene art ----------
+      const INK = '#0b1020';
+      const OBJ = {
+        elephant: {name: 'ELEPHANT', t: 6000, label: '~6 t', s: 0.95, svg: `<g stroke="${INK}" stroke-width="5" stroke-linejoin="round"><rect x="-92" y="-62" width="30" height="62" rx="8" fill="#8e97ab"/><rect x="-40" y="-62" width="30" height="62" rx="8" fill="#8e97ab"/><rect x="22" y="-62" width="30" height="62" rx="8" fill="#8e97ab"/><rect x="64" y="-62" width="30" height="62" rx="8" fill="#8e97ab"/><ellipse cx="0" cy="-112" rx="112" ry="70" fill="#a3acbf"/><circle cx="104" cy="-150" r="52" fill="#a3acbf"/><path d="M140,-130 C176,-110 170,-56 150,-30 C146,-24 136,-26 138,-34 C152,-62 150,-98 124,-112 Z" fill="#a3acbf"/><path d="M70,-196 C30,-210 20,-130 66,-110 C80,-106 88,-140 70,-196 Z" fill="#8e97ab"/><circle cx="120" cy="-164" r="6" fill="${INK}" stroke="none"/><path d="M128,-128 q18,8 30,0" fill="none" stroke="#f4efe1" stroke-width="8" stroke-linecap="round"/></g>`},
+        jet: {name: 'LOADED A380', t: 575000, label: '575 t', s: 0.85, svg: `<g stroke="${INK}" stroke-width="5" stroke-linejoin="round"><path d="M-40,-64 L-110,-20 L-80,-14 L-10,-50 Z" fill="#c9d3e3"/><path d="M-150,-70 C-150,-100 -120,-104 -90,-104 L140,-104 C176,-104 196,-86 196,-70 C196,-54 176,-40 140,-40 L-120,-40 C-140,-40 -150,-52 -150,-70 Z" fill="#eef2f8"/><path d="M-150,-70 L-176,-150 L-140,-150 L-104,-100" fill="#eef2f8"/><path d="M-120,-62 L160,-62" stroke="#2f6fd6" stroke-width="8"/><path d="M20,-58 L-50,0 L-14,0 L64,-50 Z" fill="#c9d3e3"/></g>`},
+        eiffel: {name: 'EIFFEL TOWER', t: 10100000, label: '10,100 t', s: 0.7, svg: `<g stroke="${INK}" stroke-width="5" stroke-linejoin="round"><path d="M-110,0 C-70,-40 -40,-110 -26,-200 L-14,-300 L-6,-360 L6,-360 L14,-300 L26,-200 C40,-110 70,-40 110,0 L60,0 C40,-50 -40,-50 -60,0 Z" fill="#c8955a"/><path d="M-72,-80 L72,-80" stroke-width="10"/><path d="M-36,-200 L36,-200" stroke-width="9"/><path d="M0,-360 L0,-392"/></g>`},
+        titanic: {name: 'TITANIC', t: 53150000, label: '~53,000 t', s: 0.78, svg: `<g stroke="${INK}" stroke-width="5" stroke-linejoin="round">${[-90, -36, 18, 72].map((x) => `<rect x="${x}" y="-176" width="30" height="84" fill="#f2a516"/><rect x="${x}" y="-176" width="30" height="18" fill="#1a1f2e"/>`).join('')}<rect x="-150" y="-100" width="290" height="34" fill="#f4f1ea"/><path d="M-200,-70 L210,-70 L180,0 L-170,0 Z" fill="#1a1f2e"/><path d="M-188,-24 L196,-24 L180,0 L-170,0 Z" fill="#b5302f"/></g>`},
+        empire: {name: 'EMPIRE STATE', t: 331000000, label: '~331,000 t', s: 0.58, svg: `<g stroke="${INK}" stroke-width="5" stroke-linejoin="round"><rect x="-80" y="-150" width="160" height="150" fill="#aab4c4"/><rect x="-62" y="-250" width="124" height="100" fill="#b9c2d0"/><rect x="-44" y="-330" width="88" height="80" fill="#c6cedb"/><rect x="-26" y="-372" width="52" height="42" fill="#d3dae5"/><path d="M-12,-372 L0,-430 L12,-372 Z" fill="#d3dae5"/><line x1="0" y1="-430" x2="0" y2="-470"/></g>`},
+        pyramid: {name: 'GREAT PYRAMID', t: 5.9e9, label: '~5.9 million t', s: 0.66, svg: `<g stroke="${INK}" stroke-width="5" stroke-linejoin="round"><path d="M-230,0 L0,-250 L230,0 Z" fill="#e4b866"/><path d="M0,-250 L60,0 L230,0 Z" fill="#c99a45"/></g>`},
+      };
+      const LADDER = ['elephant', 'jet', 'eiffel', 'titanic', 'empire', 'pyramid'];
+      const ladderTiming = (k) => {
+        const s = B[k];
+        const next = k === 'pyramid' ? B.light : B[LADDER[LADDER.indexOf(k) + 1]];
+        const drop = s + (k === 'elephant' ? 0.18 : 0);
+        return {s, drop, land: drop + 0.28, launch: Math.min(s + 1.15, s + (next - s) * 0.55), next};
+      };
+      // Ocean beat sits between the elephant and the jet with an empty pan.
+      const PIVOT = {x: 540, y: 940};
+      function scaleSvg(tilt, obj, squash) {
+        const a = (tilt * Math.PI) / 180;
+        const L = {x: PIVOT.x - 250 * Math.cos(a), y: PIVOT.y + 250 * Math.sin(a)};
+        const R = {x: PIVOT.x + 250 * Math.cos(a), y: PIVOT.y - 250 * Math.sin(a)};
+        const pan = (p) => `<line x1="${p.x - 100}" y1="${p.y + 110}" x2="${p.x}" y2="${p.y}" stroke="#c9d3e3" stroke-width="4"/><line x1="${p.x + 100}" y1="${p.y + 110}" x2="${p.x}" y2="${p.y}" stroke="#c9d3e3" stroke-width="4"/><path d="M${p.x - 130},${p.y + 110} L${p.x + 130},${p.y + 110} Q${p.x + 110},${p.y + 140} ${p.x},${p.y + 142} Q${p.x - 110},${p.y + 140} ${p.x - 130},${p.y + 110} Z" fill="#d9a441" stroke="${INK}" stroke-width="5"/>`;
+        let s = `<g style="filter: drop-shadow(0 0 18px rgba(255,190,90,0.35))"><path d="M${PIVOT.x - 90},${GROUND.horizon} L${PIVOT.x - 40},${GROUND.horizon - 50} L${PIVOT.x + 40},${GROUND.horizon - 50} L${PIVOT.x + 90},${GROUND.horizon} Z" fill="#d9a441" stroke="${INK}" stroke-width="5"/><rect x="${PIVOT.x - 14}" y="${PIVOT.y}" width="28" height="${GROUND.horizon - 50 - PIVOT.y}" fill="#d9a441" stroke="${INK}" stroke-width="5"/>`;
+        s += `<line x1="${L.x}" y1="${L.y}" x2="${R.x}" y2="${R.y}" stroke="${INK}" stroke-width="26" stroke-linecap="round"/><line x1="${L.x}" y1="${L.y}" x2="${R.x}" y2="${R.y}" stroke="#f2c14e" stroke-width="16" stroke-linecap="round"/><circle cx="${PIVOT.x}" cy="${PIVOT.y}" r="20" fill="#f2c14e" stroke="${INK}" stroke-width="5"/>`;
+        s += pan(L) + pan(R) + `</g>`;
+        s += `<g transform="translate(${L.x + 24},${L.y + 112}) scale(0.82,${0.82 * squash})">${flatBody()}</g>`;
+        if (obj) s += `<g opacity="${obj.o ?? 1}" transform="translate(${R.x + obj.dx},${R.y + 112 + obj.dy}) rotate(${obj.rot}) scale(${OBJ[obj.k].s})">${OBJ[obj.k].svg}</g>`;
+        return {svg: s, L, R};
+      }
+      function flatBody() {
+        return `<g stroke="#f8f8f8" stroke-width="12" stroke-linecap="round" fill="none"><line x1="-90" y1="-8" x2="70" y2="-8"/><path d="M70,-8 L118,-22 L150,-8"/><path d="M70,-8 L120,4 L156,-4"/><path d="M-60,-8 L-30,-30 L10,-22"/><path d="M-60,-8 L-28,10 L14,4"/></g>
+          <ellipse cx="-128" cy="-16" rx="42" ry="17" fill="#fff" stroke="${INK}" stroke-width="3.5"/>
+          <g stroke="${INK}" stroke-width="4" stroke-linecap="round"><line x1="-146" y1="-22" x2="-136" y2="-12"/><line x1="-146" y1="-12" x2="-136" y2="-22"/><line x1="-122" y1="-22" x2="-112" y2="-12"/><line x1="-122" y1="-12" x2="-112" y2="-22"/></g>
+          <g transform="translate(-186,-10) rotate(-25) scale(0.8,0.55)"><ellipse rx="40" ry="8" fill="#e63946" stroke="${INK}" stroke-width="3.5"/><path d="M-25,-2 C-25,-36 25,-36 25,-2 Z" fill="#e63946" stroke="${INK}" stroke-width="3.5"/></g>`;
+      }
+      function ladderAt(t) {
+        const BASE = 13;
+        for (const k of [...LADDER].reverse()) {
+          const L = ladderTiming(k);
+          if (t < L.drop) continue;
+          const u = t - L.launch;
+          if (u > 0.9) return {obj: null, tilt: BASE, k: null, landed: false};
+          let dx = 0, dy = 0, rot = 0, tilt = BASE;
+          if (t < L.land) {
+            const p = (t - L.drop) / (L.land - L.drop);
+            dy = -1100 * (1 - p * p);
+          } else if (t < L.launch) {
+            const v = t - L.land;
+            dy = -34 * Math.abs(Math.sin((Math.PI * v) / 0.16)) * Math.exp(-v / 0.1);
+            tilt = lerp(BASE, 1, ease.out(seg(t, L.land, L.land + 0.12))) + (t > L.land + 0.12 ? -6 * Math.exp(-(t - L.land - 0.12) / 0.15) : 0);
+          } else {
+            dx = 1200 * u;
+            dy = -1900 * u + 1500 * u * u;
+            rot = 600 * u;
+            tilt = lerp(1, 22, seg(t, L.launch, L.launch + 0.07)) - (t > L.launch + 0.07 ? (22 - BASE) * ease.out(seg(t, L.launch + 0.07, L.launch + 0.35)) : 0);
+          }
+          return {obj: {k, dx, dy, rot}, tilt, k, landed: t >= L.land, launched: t >= L.launch, L};
+        }
+        return {obj: null, tilt: BASE, k: null, landed: false};
+      }
+
+      // ---------- Build HUD ----------
+      const tracker = new K.Tracker($('hud'), 'WHAT BREAKS FIRST?', ['YOU', 'THE AIR', 'EARTH']);
+      const caps = new K.Captions($('caps'), T.lines);
+      const globe = new K.Globe($('globe'));
+      const sun = new K.Globe($('globe'), {full: true, step: 2.2});
+      const gctx = $('globe').getContext('2d');
+      const fx = $('fx').getContext('2d');
+      const bg = $('bg').getContext('2d');
+
+      const hits = [
+        {at: B.g2 + 0.42, amp: 14},
+        {at: B.g8, amp: 18},
+        {at: B.blackout + 0.05, amp: 22},
+        ...LADDER.map((k) => ({at: ladderTiming(k).land, amp: k === 'pyramid' ? 26 : 16})),
+        ...LADDER.map((k) => ({at: ladderTiming(k).launch, amp: 10})),
+        {at: B.collapsed, amp: 30},
+      ];
+      const blurs = [
+        {at: B.sun, dur: 0.5},
+        {at: B.elephant, dur: 0.5},
+      ];
+      const glitches = [
+        {at: B.rewind + 0.25, dur: 0.5},
+        {at: B.title + 0.15, dur: 0.3},
+      ];
+
+      // ---------- Per-frame render ----------
+      function render(t) {
+        const g = gAt(t);
+        const sim = simAt(t);
+        const v = viewAt(t);
+        const shake = K.shake(t, hits);
+        const blur = K.pulse(t, blurs) * 26;
+        const glitch = K.pulse(t, glitches);
+        const scene = $('scene');
+        const punch = 1 + 0.035 * hits.reduce((m, h) => Math.max(m, t >= h.at && t < h.at + 0.3 ? 1 - (t - h.at) / 0.3 : 0), 0);
+        scene.style.transform = `translate(${shake.x + glitch * 18 * Math.sin(t * 190)}px, ${shake.y}px) scale(${punch})`;
+        scene.style.filter =
+          [blur > 0.3 ? `blur(${blur}px)` : '', glitch > 0.05 ? `drop-shadow(${10 * glitch}px 0 0 rgba(255,0,60,0.7)) drop-shadow(${-10 * glitch}px 0 0 rgba(0,220,255,0.7))` : '']
+            .filter(Boolean)
+            .join(' ') || 'none';
+        $('bands').style.opacity = glitch;
+
+        // Background
+        bg.fillStyle = '#000008';
+        bg.fillRect(0, 0, 1080, 1920);
+        K.stars(bg, t, {dur: DUR});
+        const fast = t >= B.jet && t < B.light ? 1 : 0;
+        K.streaks(bg, t, {dur: DUR, n: 22 + fast * 14, alpha: 0.28 + 0.25 * fast, speed: 1 + fast * 2});
+
+        // Globe / ground
+        gctx.clearRect(0, 0, 1080, 1920);
+        const inSun = t >= B.sun && t < B.elephant;
+        const collapse = t < B.rewind ? 1 : t < B.start ? 1 - ease.in(seg(t, B.rewind, B.start)) : Math.pow(seg(t, B.end, B.collapsed), 2);
+        if (!inSun) {
+          // Atmosphere glow above the ground, squashed as gravity grows.
+          if (v.zoom > 0.05) {
+            const atmo = Math.max(10, 420 / Math.sqrt(g)) * v.zoom;
+            const ag = gctx.createRadialGradient(v.cx, v.cy, v.r, v.cx, v.cy, v.r + atmo);
+            ag.addColorStop(0, 'rgba(70,150,255,0.55)');
+            ag.addColorStop(1, 'rgba(70,150,255,0)');
+            gctx.fillStyle = ag;
+            gctx.beginPath();
+            gctx.arc(v.cx, v.cy, v.r + atmo, 0, Math.PI * 2);
+            gctx.fill();
+          }
+          globe.draw({...v, collapse, alpha: collapse >= 0.999 ? 0 : 1});
+          if (v.zoom > 0.05) {
+            gctx.save();
+            gctx.strokeStyle = '#8cc8ff';
+            gctx.shadowColor = '#4a9cff';
+            gctx.shadowBlur = 26;
+            gctx.lineWidth = 4;
+            gctx.globalAlpha = v.zoom;
+            gctx.beginPath();
+            gctx.arc(v.cx, v.cy, v.r, Math.PI * 1.2, Math.PI * 1.8);
+            gctx.stroke();
+            gctx.restore();
+            const lens = gctx.createRadialGradient(120, 1090, 0, 120, 1090, 120);
+            lens.addColorStop(0, `rgba(220,235,255,${0.35 * v.zoom})`);
+            lens.addColorStop(1, 'rgba(220,235,255,0)');
+            gctx.fillStyle = lens;
+            gctx.fillRect(0, 960, 260, 260);
+          }
+        } else {
+          globe.draw({cx: 290, cy: 830, r: 150, spin: spinAt(t), tilt: 20});
+          sun.draw({cx: 780, cy: 760, r: 270, spin: t * 8, tilt: 10, color: [255, 214, 140], limb: [255, 110, 40], oceanColors: ['#a33d05', '#4a1700', '#ff8a2a'], glow: 'rgba(255,140,40,0.9)'});
+        }
+
+        // FX layer: dial, light rays, black hole, particles
+        fx.clearRect(0, 0, 1080, 1920);
+        const inStart = t >= B.start - 0.1 && t < B.g2 + 0.2;
+        if (inStart) {
+          const a = seg(t, B.start, B.start + 0.3) * (1 - seg(t, B.g2, B.g2 + 0.2));
+          fx.save();
+          fx.globalAlpha = a * 0.8;
+          fx.strokeStyle = '#9cc4ff';
+          for (let i = 0; i < 72; i++) {
+            const ang = (i / 72) * Math.PI * 2 + t * 0.15;
+            const r0 = GLOBE.r + 36, r1 = GLOBE.r + (i % 6 ? 50 : 66);
+            fx.lineWidth = i % 6 ? 2 : 4;
+            fx.beginPath();
+            fx.moveTo(540 + Math.cos(ang) * r0, 880 + Math.sin(ang) * r0);
+            fx.lineTo(540 + Math.cos(ang) * r1, 880 + Math.sin(ang) * r1);
+            fx.stroke();
+          }
+          fx.fillStyle = '#f82838';
+          fx.shadowColor = '#f82838';
+          fx.shadowBlur = 16;
+          fx.beginPath();
+          fx.moveTo(540, 470);
+          fx.lineTo(540, 520);
+          fx.moveTo(540, 470);
+          fx.fillRect(540, 470, 34, 22);
+          fx.fillRect(537, 470, 6, 58);
+          fx.restore();
+        }
+        if (t >= B.light && t < B.collapsed) {
+          const fill = Math.min(1, escAt(t) / 299792.458);
+          const k = Math.pow(K.clamp01((fill - 0.55) / 0.45), 1.2);
+          const r = v.r * (1 - collapse * 0.82);
+          fx.save();
+          fx.globalAlpha = seg(t, B.light + 0.5, B.light + 0.9) * (1 - collapse);
+          fx.strokeStyle = '#fff6c9';
+          fx.shadowColor = 'rgba(255,240,180,0.95)';
+          fx.shadowBlur = 14;
+          fx.lineWidth = 6;
+          fx.lineCap = 'round';
+          fx.setLineDash([26, 22]);
+          fx.lineDashOffset = -t * 260;
+          for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2 + 0.2;
+            const sx = v.cx + Math.cos(a) * r, sy = v.cy + Math.sin(a) * r;
+            const far = 560;
+            const land = a + 0.5;
+            const ex = lerp(sx + Math.cos(a) * far, v.cx + Math.cos(land) * r, k);
+            const ey = lerp(sy + Math.sin(a) * far, v.cy + Math.sin(land) * r, k);
+            const apex = a + 0.25 * k;
+            const qx = lerp(sx + Math.cos(a) * far * 0.5, v.cx + Math.cos(apex) * (r + 230), k);
+            const qy = lerp(sy + Math.sin(a) * far * 0.5, v.cy + Math.sin(apex) * (r + 230), k);
+            fx.beginPath();
+            fx.moveTo(sx, sy);
+            fx.quadraticCurveTo(qx, qy, ex, ey);
+            fx.stroke();
+          }
+          fx.restore();
+        }
+        const holeA = t < B.rewind ? 1 : t < B.start ? 1 - seg(t, B.rewind, B.rewind + 0.3) : seg(t, B.end + 0.45, B.collapsed);
+        K.blackHole(fx, 540, 880, 95, t / DUR, holeA);
+        if (t >= B.collapsed && t < B.collapsed + 0.9) {
+          const p = seg(t, B.collapsed, B.collapsed + 0.9);
+          fx.save();
+          fx.strokeStyle = '#fff';
+          fx.globalAlpha = 1 - p;
+          fx.lineWidth = 16 * (1 - p) + 2;
+          fx.beginPath();
+          fx.arc(540, 880, 95 + p * 900, 0, Math.PI * 2);
+          fx.stroke();
+          fx.restore();
+        }
+        // Coffee splash when the twin lands, dust on every object landing
+        K.burst(fx, t, B.g2 + 0.45, {x: 610, y: 1010, n: 18, seed: 5, speed: [180, 520], angle: [-2.6, -0.5], g: 1400, life: 0.9, size: [8, 16], fill: '#6b4226'});
+        for (const k of LADDER) {
+          const L = ladderTiming(k);
+          K.burst(fx, t, L.land, {x: 790, y: 1060, n: 16, seed: k.length * 7, speed: [120, 420], angle: [-3.0, -0.1], g: 900, life: 0.7, size: [8, 18], fill: '#3a4a6a', stroke: '#0b1020'});
+        }
+
+        // Stage: stickman, ghost, scale
+        let svg = '';
+        const ground = !inSun && t >= B.g2 + 0.3 && t < B.light + 0.5;
+        const GX = 540, GY = GROUND.horizon;
+        const groundOn = ground ? 1 - seg(t, B.light, B.light + 0.4) : 0;
+        if (ground && t < B.elephant) {
+          // Standing, straining, collapsing
+          let pose = K.POSES.hold;
+          let eyes = 'dot', mouth = 'smile', sweat = 0;
+          if (t >= B.g2 + 0.42) {
+            pose = K.lerpPose(K.POSES.hold, K.POSES.strain, ease.out(seg(t, B.g2 + 0.42, B.g2 + 0.6)));
+            mouth = 'grit';
+          }
+          if (t >= B.g8) {
+            pose = K.lerpPose(K.POSES.strain, K.POSES.buckle, ease.out(seg(t, B.g8, B.g8 + 0.3)));
+            eyes = t < B.blackout ? 'wide' : 'x';
+          }
+          const tremble = t >= B.g2 + 0.42 ? (t >= B.g8 ? 5 : 2.5) * Math.sin(t * 120) : 0;
+          const sq = 1 - 0.82 * ease.in(seg(t, B.blackout, B.blackout + 0.2));
+          const sx = 1 + 0.5 * ease.in(seg(t, B.blackout, B.blackout + 0.2));
+          if (t < B.blackout + 0.2) {
+            svg += `<g transform="translate(${GX + tremble},${GY}) scale(${sx},${sq})">${K.stick(pose, {eyes, mouth, cup: t < B.g8})}</g>`;
+            if (t >= B.g2 + 0.12 && t < B.g8 + 0.12) {
+              const drop = ease.out(seg(t, B.g2 + 0.12, B.g2 + 0.42));
+              const s = 0.8 * (t < B.g8 ? 1 : 1 - seg(t, B.g8, B.g8 + 0.12));
+              svg += `<g transform="translate(${GX + tremble},${GY - 236 + (1 - drop) * -500}) scale(${s})">${K.stick(K.POSES.shoulders, {mouth: 'smile'})}</g>`;
+            }
+          } else {
+            svg += `<g transform="translate(${GX + 40},${GY + 2}) scale(1.25)">${flatBody()}</g>`;
+          }
+        }
+        if (ground && t >= B.elephant) {
+          const L = ladderAt(t);
+          const squash = Math.max(0.4, 1 - Math.log2(g) / 40);
+          const sc = scaleSvg(L.tilt, L.obj, squash);
+          svg += `<g opacity="${groundOn}">${sc.svg}</g>`;
+          if (L.obj && L.launched) {
+            const u = t - L.L.launch;
+            let trail = '';
+            for (let i = 4; i >= 1; i--) {
+              const uu = Math.max(0, u - i * 0.03);
+              trail += `<g opacity="${0.12 * (5 - i)}" transform="translate(${sc.R.x + 1200 * uu},${sc.R.y + 112 - 1900 * uu + 1500 * uu * uu}) rotate(${600 * uu}) scale(${OBJ[L.k].s})" style="filter: brightness(0) invert(0.3) sepia(1) saturate(8) hue-rotate(-30deg)">${OBJ[L.k].svg}</g>`;
+            }
+            svg = trail + svg;
+          }
+          render.ladder = {...L, sc};
+        } else {
+          render.ladder = null;
+        }
+        // Ghost
+        const ghostStart = B.blackout + 0.25;
+        if (t >= ghostStart && t < B.collapsed + 0.6 && !inSun) {
+          const rise = ease.out(seg(t, ghostStart, ghostStart + 0.8));
+          const bob = 10 * Math.sin((t / DUR) * Math.PI * 2 * 18);
+          let gx = lerp(GX, 170, rise), gy = lerp(GY - 20, 860, rise) + bob, gs = lerp(0.5, 0.8, rise);
+          let pose = K.POSES.float, eyes = 'wide', mouth = 'o';
+          if (t >= B.elephant) pose = K.POSES.point;
+          if (t >= B.ocean) pose = K.POSES.handsHead;
+          if (t >= B.jet) pose = (Math.floor((t - B.jet) / 1.5) % 2 ? K.POSES.handsHead : K.POSES.shock);
+          let rot = 0;
+          if (t >= B.light) {
+            const zp = seg(t, B.light, B.light + 0.8);
+            gx = lerp(170, 130, zp);
+            gy = lerp(860, 1090, zp) + bob;
+            gs = lerp(0.8, 0.55, zp);
+            pose = K.POSES.shock;
+          }
+          if (t >= B.end + 0.3) {
+            const s = ease.in(seg(t, B.end + 0.3, B.collapsed + 0.5));
+            const r0 = Math.hypot(gx - 540, gy - 880), a0 = Math.atan2(gy - 880, gx - 540) - s * 7;
+            gx = 540 + Math.cos(a0) * r0 * (1 - s);
+            gy = 880 + Math.sin(a0) * r0 * (1 - s);
+            gs *= 1 - s;
+            rot = s * 720;
+          }
+          svg += `<g transform="translate(${gx},${gy}) rotate(${rot}) scale(${gs})" style="filter: drop-shadow(0 0 16px rgba(120,220,255,0.95))">${K.stick(pose, {color: '#bfeaff', eyes, mouth, hat: 'halo', look: 1})}</g>`;
+          render.ghost = {x: gx, y: gy, s: gs};
+        }
+        $('stage').innerHTML = svg;
+
+        // ---------- DOM elements in the scene ----------
+        apply($('title'), pop(t, -1, B.rewind + 0.35), '');
+        if (t >= B.title) apply($('title'), pop(t, B.title, Infinity, 0.25));
+        const tp = t < B.title ? pop(t, -1, B.rewind + 0.35) : pop(t, B.title + 0.12, Infinity, 0.25);
+        apply($('titlePillWrap'), tp);
+        $('titleVal').textContent = fmt(g);
+
+        apply($('clock'), pop(t, B.start + 0.05, B.g2 + 0.15));
+        const secs = Math.floor(sim + 1e-6);
+        $('clockNum').innerHTML = `00:00:0<b>${Math.min(9, Math.max(0, secs))}</b>`;
+
+        apply($('bigG'), t < B.sun ? pop(t, B.g8, B.sun) : pop(t, B.ocean, B.jet));
+        $('bigGNum').textContent = gText(g);
+        apply($('sunG'), pop(t, B.sun + 0.1, B.elephant));
+        $('sunGNum').textContent = gText(g);
+        apply($('sunPill'), pop(t, B.sun + 0.25, B.elephant));
+        apply($('passed'), pop(t, B.sun + 0.6, B.elephant, 0.15), 'rotate(-6deg)');
+        apply($('infoSun'), pop(t, B.sun + 0.9, B.elephant));
+        apply($('infoSea'), pop(t, B.ocean + 0.9, B.jet));
+
+        // Tag above the stickman and the gravity chip
+        apply($('youTag'), pop(t, B.g2 + 0.5, B.blackout));
+        $('youTag').style.left = `${GX - 75}px`;
+        $('youTag').style.top = `${t < B.g8 ? GY - 640 : GY - 420}px`;
+        $('youTagVal').textContent = weight(70 * g);
+        const chipOn = t < B.sun ? pop(t, B.g2 + 0.7, B.sun) : t < B.jet ? pop(t, B.elephant + 0.3, B.ocean) : pop(t, B.jet + 0.3, B.light);
+        apply($('gChip'), chipOn);
+        $('gChipVal').textContent = `${gText(g)} G`;
+        apply($('shoutTwin'), pop(t, B.g2 + 0.55, B.g8));
+        $('shoutTwin').style.left = '640px';
+        $('shoutTwin').style.top = `${GY - 470}px`;
+        apply($('shoutGhost'), pop(t, B.blackout + 0.9, B.sun), 'rotate(-6deg)');
+        $('shoutGhost').style.left = '240px';
+        $('shoutGhost').style.top = '600px';
+        $('shoutTwin').style.transform += ' rotate(-6deg)';
+
+        // Weight comparison bars
+        const L = render.ladder;
+        const barsOn = L && L.k ? pop(t, L.L.land, L.L.next - 0.05) : {vis: 0, scale: 1, blur: 0};
+        apply($('bars'), barsOn);
+        if (L && L.k) {
+          const you = 70 * g / 1000;
+          const obj = OBJ[L.k].t / 1000;
+          const grow = ease.out(seg(t, L.L.land, L.L.land + 0.35));
+          const max = Math.max(you, obj);
+          $('youVal').textContent = weight(70 * g);
+          $('objName').textContent = OBJ[L.k].name;
+          $('objVal').textContent = OBJ[L.k].label;
+          $('youFill').style.width = `${(100 * you * grow) / max}%`;
+          $('objFill').style.width = `${(100 * obj * grow) / max}%`;
+        }
+
+        // Escape speed
+        const esc = escAt(t);
+        apply($('escape'), pop(t, B.light + 0.6, B.end + 0.2));
+        apply($('escLabelWrap'), pop(t, B.light + 0.6, B.end + 0.2));
+        const full = esc >= 299792.458;
+        $('escNum').textContent = full ? '299,792' : fmt(esc);
+        $('escNum').className = `num ${full ? 'glow-cyan' : 'glow-orange'}`;
+        apply($('lightBars'), pop(t, B.light + 0.9, B.end - 0.55));
+        $('lbEsc').textContent = `${fmt(Math.min(esc, 299792))} km/s`;
+        $('lbEscFill').style.width = `${Math.min(100, (100 * esc) / 299792.458)}%`;
+        apply($('infoLight'), pop(t, B.end - 0.5, B.end + 0.5));
+
+        // Blackout tunnel
+        const tun = $('tunnel');
+        const red = seg(t, B.g8 + 0.05, B.g8 + 0.3) * (1 - seg(t, B.blackout - 0.1, B.blackout + 0.1));
+        const black = Math.sin(Math.PI * seg(t, B.blackout - 0.15, B.blackout + 0.75));
+        tun.style.background = `radial-gradient(circle at 50% 52%, rgba(0,0,0,0) ${lerp(60, 8, black)}%, rgba(${Math.round(120 * red)},0,${Math.round(10 * red)},${0.85 * Math.max(red, black)}) ${lerp(85, 40, black)}%)`;
+        tun.style.opacity = Math.max(red, black);
+
+        // HUD
+        const st = (at) => (t >= at ? ['fail', seg(t, at, at + 0.3)] : 'pending');
+        tracker.set([st(B.blackout + 0.05), st(B.ocean + 1.4), st(B.collapsed + 0.05)], pop(t, B.start + 0.2, B.title).vis);
+        caps.set(t);
+
+        $('flash').style.background = '#fff';
+        const fl = (at, d, pk) => (t >= at && t < at + d ? pk * (1 - (t - at) / d) : 0);
+        $('flash').style.opacity = Math.max(fl(B.start, 0.12, 0.5), fl(B.collapsed, 0.3, 0.9), fl(B.title + 0.1, 0.1, 0.3));
+      }
+
+      const tl = gsap.timeline({paused: true});
+      tl.to({}, {duration: DUR, ease: 'none', onUpdate: () => render(tl.time())}, 0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines['main'] = tl;
+      tl.seek(0);
+      render(0);
+    </script>
+  </body>
+</html>

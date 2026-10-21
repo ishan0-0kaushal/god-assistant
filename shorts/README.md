@@ -4,8 +4,13 @@ Code-built YouTube Shorts for the Actually Animated channel (stickman explainers
 
 | # | Short | Script | Build | Status |
 |---|---|---|---|---|
-| 01 | What if Earth's gravity doubled every second? | [scripts/01-gravity-doubles.md](scripts/01-gravity-doubles.md) | Remotion ([01-gravity-remotion](01-gravity-remotion)) | Draft rendered, placeholder SFX, no VO |
-| 02 | Falling from every height | [scripts/02-fall-from-every-height.md](scripts/02-fall-from-every-height.md) | HyperFrames ([02-falling-hyperframes](02-falling-hyperframes)) | Draft rendered, placeholder SFX, no VO |
+| 01 | What if Earth's gravity doubled every second? | [scripts/01-gravity-doubles.md](scripts/01-gravity-doubles.md) | [studio](studio) (`src/gravity.*`) | Draft rendered in the channel style, placeholder SFX, no VO |
+| 02 | Falling from every height | [scripts/02-fall-from-every-height.md](scripts/02-fall-from-every-height.md) | [studio](studio) (`src/falling.*`) | Draft rendered in the channel style, placeholder SFX, no VO |
+
+The visual style is written down in [STYLE.md](STYLE.md), measured from the channel's own
+"What if the Earth stopped spinning" short. [`01-gravity-remotion`](01-gravity-remotion) and
+[`02-falling-hyperframes`](02-falling-hyperframes) are the first drafts, kept for reference and
+superseded by `studio`.
 
 ## Format rules (from the vidIQ channel analysis)
 
@@ -17,22 +22,16 @@ Code-built YouTube Shorts for the Actually Animated channel (stickman explainers
 
 ## Voiceover (next step)
 
-Generated with ElevenLabs from the VO column of each script. Reads two environment variables:
-
-- `ELEVENLABS_API_KEY`
-- `ELEVENLABS_VOICE_ID`
-
-The cloud environment also needs `api.elevenlabs.io` under Allowed domains.
-
-Plan: generate each line with the timestamps endpoint, set every beat's start/end from the real
-word timings (`src/timeline.ts` for 01; `data-start` values and script times for 02), add the VO as
-an audio track, then re-render. The sound effects are ffmpeg placeholders and can be swapped for
-ElevenLabs sound effects with the same key.
+Generated with ElevenLabs from the caption lines in each timing file. Reads two environment
+variables, `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID`, and the cloud environment needs
+`api.elevenlabs.io` under Allowed domains. The steps are in [studio/README.md](studio/README.md).
+The sound effects are ffmpeg placeholders and can be swapped for ElevenLabs sound effects with the
+same key.
 
 ## Remotion vs HyperFrames, from building one short in each
 
-- **Retiming:** Remotion drives everything from one beats table, so fitting the voiceover is a
-  one-file change. The HyperFrames version has times spread across HTML attributes and script.
+- **Retiming:** the first HyperFrames draft had times spread across HTML attributes and script.
+  The studio fixes that with a build step: everything reads one timing JSON per short.
 - **Reuse:** the Remotion stickman, counter bar and captions are components with props, ready to
   become a template. In HyperFrames the same things are copy-paste HTML/JS.
 - **Tooling:** HyperFrames' lint caught audio that would have rendered silent, and its `snapshot`
@@ -42,4 +41,5 @@ ElevenLabs sound effects with the same key.
   vs 0.987 (HyperFrames) against a lossless reference at the same bitrate: a tie. Both can render
   at 2x density for a 4K upload (`--scale=2` / `--resolution portrait-4k`).
 - **Speed at matched quality:** ~1m40s (Remotion) vs ~1m20s (HyperFrames) for a 30 s render on 4 cores.
-- **Pick for the daily template:** Remotion.
+- **Pick for the daily template:** HyperFrames (`studio`), to match how the channel's existing
+  shorts are built.

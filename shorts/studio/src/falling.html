@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Falling from every height</title>
+    <link rel="stylesheet" href="kit/kit.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <script src="kit/land-dots.js"></script>
+    <script src="kit/kit.js"></script>
+    <!-- @timing -->
+    <style>
+      #title { top: 236px; }
+      #title .title-big { font-size: 140px; margin-top: 10px; }
+      #speed { top: 222px; }
+      #speedLabel, #heightLabel, #throwLabel { font: 800 30px var(--ui); letter-spacing: 1px; }
+      #height { top: 222px; }
+      #throw { top: 222px; }
+      #throw .num, #height .num, #speed .num { font-size: 220px; }
+      #throw .unit, #height .unit, #speed .unit { font-size: 92px; }
+      #fallenChip { left: 60px; top: 1215px; }
+      #impactTag .v { color: var(--cyan); }
+      #impactTag { border-color: var(--cyan); box-shadow: 0 0 18px rgba(64, 216, 232, 0.5); }
+      #impactTag::after { border-top-color: var(--cyan); }
+      #gbars { top: 330px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="{{DURATION}}" data-width="1080" data-height="1920">
+      <canvas id="bg" class="layer" width="1080" height="1920"></canvas>
+
+      <div id="scene" class="layer">
+        <canvas id="globe" class="layer" width="1080" height="1920"></canvas>
+        <canvas id="fx" class="layer" width="1080" height="1920"></canvas>
+        <svg id="stage" class="layer" viewBox="0 0 1080 1920"></svg>
+
+        <div id="title" class="title">
+          <div class="title-small">FALLING FROM</div>
+          <div class="title-big">EVERY <span class="red">HEIGHT</span></div>
+        </div>
+        <div class="center-x" id="titlePill" style="position: absolute; top: 500px">
+          <div class="pill"><span class="dot"></span>TERMINAL SPEED <span class="val">195</span> KM/H</div>
+        </div>
+
+        <div class="center-x" id="speedLabelWrap" style="position: absolute; top: 212px"><div id="speedLabel" style="color: var(--coral)">FALLING SPEED</div></div>
+        <div id="speed" class="counter"><span class="num glow-coral" id="speedNum">62</span><span class="unit">KM/H</span></div>
+        <div class="center-x" id="heightLabelWrap" style="position: absolute; top: 212px"><div id="heightLabel" style="color: var(--cyan)">FALLEN SO FAR</div></div>
+        <div id="height" class="counter"><span class="num glow-cyan" id="heightNum">450</span><span class="unit" id="heightUnit">M</span></div>
+        <div class="center-x" id="throwLabelWrap" style="position: absolute; top: 212px"><div id="throwLabel" style="color: var(--cyan)">THROWN SIDEWAYS AT</div></div>
+        <div id="throw" class="counter"><span class="num glow-orange" id="throwNum">7,000</span><span class="unit">KM/H</span></div>
+
+        <div id="maxStamp" class="stamp" style="top: 470px; left: 640px"><span class="v">MAX</span></div>
+        <div id="machStamp" class="stamp" style="top: 470px; left: 620px"><span class="k">MACH</span><span class="v">1.25</span></div>
+        <div id="recordStamp" class="stamp" style="top: 600px; left: 300px; background: #ffb703; color: #1a0f00"><span class="v">WORLD RECORD</span></div>
+        <div id="orbitStamp" class="stamp" style="top: 480px; left: 660px; background: #40d8e8; color: #00121a"><span class="v">ORBIT</span></div>
+        <div id="survival" class="stamp" style="top: 700px; left: 330px"><span class="k">SURVIVAL</span><span class="v">≈ 50%</span></div>
+
+        <div id="impactTag" class="tag"><div class="k">IMPACT</div><div class="v" id="impactVal">16 KM/H</div></div>
+        <div id="fallenChip" class="chip"><div class="k">FALLEN</div><div class="v" id="fallenVal">450 M</div></div>
+        <div id="crackShout" class="shout" style="color: #ff6b75">CRACK!</div>
+        <div id="okShout" class="shout">NAILED IT.</div>
+        <div id="felixShout" class="shout">IS THIS SAFE?!</div>
+
+        <div class="center-x" id="speedPill" style="position: absolute; top: 500px">
+          <div class="pill"><span class="dot" style="background: var(--coral); box-shadow: 0 0 10px var(--coral)"></span>SPEED <span class="val">195</span> KM/H</div>
+        </div>
+        <div class="center-x" id="vulPill" style="position: absolute; top: 330px">
+          <div class="pill" style="height: 76px; font-size: 32px"><span class="dot" style="background: var(--orange); box-shadow: 0 0 10px var(--orange)"></span>VESNA VULOVIĆ <span class="val" style="font-size: 52px">1972</span></div>
+        </div>
+        <div class="center-x" id="vulPill2" style="position: absolute; top: 425px">
+          <div class="pill">FELL <span class="val">10,160</span> M · SURVIVED</div>
+        </div>
+        <div id="felixPill" class="chip" style="left: 60px; top: 1190px"><div class="k" style="color: var(--orange)">2012 · 38,969 M</div><div class="v">FELIX BAUMGARTNER</div></div>
+        <div id="jetPill" class="pill" style="position: absolute">AIRLINERS FLY HERE · <span class="val">10</span> KM</div>
+        <div id="issPill" class="pill" style="position: absolute"><span class="dot"></span>ISS · <span class="val">400</span> KM UP</div>
+
+        <div id="gbars" class="bars">
+          <div class="bar-row"><div class="bar-head"><span>GRAVITY PULLS</span><span class="n" style="color: var(--red)">↓</span></div><div class="bar-track"><div class="bar-fill" id="gFill" style="background: linear-gradient(90deg, #f82838, #ff5060)"></div></div></div>
+          <div class="bar-row"><div class="bar-head"><span>AIR PUSHES</span><span class="n" style="color: var(--cyan)">↑</span></div><div class="bar-track"><div class="bar-fill" id="aFill" style="background: linear-gradient(90deg, #2a7fff, #40d8e8)"></div></div></div>
+        </div>
+        <div id="infoEqual" class="info cyan" style="top: 1280px"><span class="ico" style="color: var(--cyan)">≈</span>SPEED <span class="hl">STOPS CLIMBING</span></div>
+        <div id="infoBrake" class="info cyan" style="top: 1280px"><span class="ico" style="color: var(--cyan)">≈</span>THICK AIR = <span class="hl">BRAKES</span></div>
+        <div id="infoOrbit" class="info cyan" style="top: 1326px"><span class="ico" style="color: var(--cyan)">≈</span>FALLING, BUT <span class="hl">ALWAYS MISSING</span></div>
+      </div>
+
+      <div class="vignette"></div>
+      <div id="hud" class="layer"></div>
+      <div id="caps" class="layer"></div>
+      <div id="bands" class="bands"></div>
+      <div id="flash" class="flash"></div>
+
+      <!-- @audio -->
+    </div>
+
+    <script>
+      const T = window.TIMING;
+      const B = T.beats;
+      const DUR = T.duration;
+      const FPS = 30;
+      const {seg, lerp, ease, fmt, pop, apply} = K;
+      const $ = (id) => document.getElementById(id);
+      const INK = '#0b1020';
+      const loopSin = (t, cycles) => Math.sin((2 * Math.PI * cycles * t) / DUR);
+
+      // ---------- Numbers over time ----------
+      function speedAt(t) {
+        if (t < B.d1) return 195;
+        if (t < B.d3) return 16 * seg(t, B.d1fall, B.d1land);
+        if (t < B.d15) return 28 * seg(t, B.d3fall, B.d3land);
+        if (t < B.sky) return 62 * seg(t, B.d15fall, B.d15land);
+        if (t < B.max) return lerp(62, 195, 1 - Math.pow(1 - seg(t, B.sky, B.max), 2.2));
+        if (t < B.felix) return 195 + (t > B.high && t < B.vul ? 1.5 * Math.sin(t * 41) : 0);
+        if (t < B.brake) return lerp(195, 1357.6, ease.in(seg(t, B.jump + 0.2, B.mach + 0.3)));
+        if (t < B.iss) return lerp(1357.6, 200, ease.out(seg(t, B.brake, B.brake + 1.6)));
+        return 195;
+      }
+      function heightAt(t) {
+        if (t < B.sky) return 15;
+        if (t < B.high) return lerp(15, 450, ease.out(seg(t, B.sky, B.max)));
+        return lerp(450, 10000, ease.inOut(seg(t, B.high, B.high + 2.2)));
+      }
+
+      // ---------- Camera / globe views ----------
+      const PLANET = {cx: 540, cy: 960, r: 250};
+      function globeView(t) {
+        const spin = -40 + t * 1.5;
+        if (t >= B.d1 && t < B.sky) return {cx: 540, cy: 1180 + 2600 + cam15(t), r: 2600, spin, tilt: 20};
+        if (t >= B.felix && t < B.iss) {
+          const p = ease.inOut(seg(t, B.brake, B.brake + 2.0));
+          const r = lerp(2200, 3600, p);
+          const horizon = lerp(1330, 1170, p);
+          return {cx: 540, cy: horizon + r, r, spin, tilt: 25};
+        }
+        if (t >= B.iss) {
+          const zin = ease.inOut(seg(t, B.iss, B.iss + 0.8));
+          const zout = ease.in(seg(t, B.dive, B.dive + 0.7));
+          const r0 = 3600 * Math.pow(PLANET.r / 3600, zin);
+          const h0 = lerp(1170, PLANET.cy - PLANET.r, zin);
+          const r = r0 * Math.pow(9000 / PLANET.r, zout);
+          const horizon = lerp(h0, 2200, zout);
+          return {cx: 540, cy: horizon + r, r, spin, tilt: 25};
+        }
+        return null;
+      }
+      function cam15(t) {
+        if (t < B.d15) return 0;
+        const manY = lerp(-320, 1180, ease.in(seg(t, B.d15fall, B.d15land)));
+        return Math.max(0, Math.min(1020, 700 - manY));
+      }
+      function skyAt(t) {
+        // [top, bottom] colors; ground beats are night, the stratosphere goes black.
+        const day = [[3, 8, 26], [16, 44, 96]];
+        const high = [[2, 5, 18], [10, 30, 72]];
+        const black = [[0, 0, 6], [5, 12, 32]];
+        const mix = (a, b, p) => a.map((c, i) => c.map((v, j) => Math.round(lerp(v, b[i][j], p))));
+        let s = day;
+        s = mix(s, high, ease.inOut(seg(t, B.high, B.high + 1.6)));
+        s = mix(s, black, ease.inOut(seg(t, B.felix - 0.2, B.felix + 0.3)));
+        s = mix(s, day, ease.inOut(seg(t, B.brake, B.brake + 1.8)));
+        s = mix(s, black, ease.inOut(seg(t, B.iss, B.iss + 0.6)));
+        s = mix(s, day, ease.inOut(seg(t, B.dive + 0.2, B.dive + 0.7)));
+        return s;
+      }
+
+      // ---------- Art ----------
+      const prop = (d, fill = '#121a33') => `<g style="filter: drop-shadow(0 0 14px rgba(255,155,69,0.55))">${d.replaceAll('PF', fill)}</g>`;
+      const CRATE = prop(`<rect x="380" y="1015" width="160" height="165" rx="10" fill="PF" stroke="#ff9b45" stroke-width="5"/><path d="M380,1015 L540,1180 M540,1015 L380,1180" stroke="#ff9b45" stroke-width="4" opacity="0.7"/>`);
+      const WALL = prop(`<rect x="230" y="685" width="220" height="495" fill="PF" stroke="#ff9b45" stroke-width="5"/>${[765, 845, 925, 1005, 1085].map((y) => `<line x1="230" y1="${y}" x2="450" y2="${y}" stroke="#ff9b45" stroke-width="3" opacity="0.5"/>`).join('')}`);
+      const BUILDING = (() => {
+        let w = '';
+        for (let f = 0; f < 5; f++) for (let c = 0; c < 3; c++) w += `<rect x="${175 + c * 100}" y="${-320 + 60 + f * 300}" width="70" height="150" rx="6" fill="#ffd27a" opacity="0.55"/>`;
+        return prop(`<rect x="140" y="-320" width="330" height="1500" fill="PF" stroke="#ff9b45" stroke-width="5"/>${w}`);
+      })();
+      const JET = `<g stroke="${INK}" stroke-width="5" stroke-linejoin="round"><path d="M-40,-64 L-110,-20 L-80,-14 L-10,-50 Z" fill="#c9d3e3"/><path d="M-150,-70 C-150,-100 -120,-104 -90,-104 L140,-104 C176,-104 196,-86 196,-70 C196,-54 176,-40 140,-40 L-120,-40 C-140,-40 -150,-52 -150,-70 Z" fill="#eef2f8"/><path d="M-150,-70 L-176,-150 L-140,-150 L-104,-100" fill="#eef2f8"/><path d="M-120,-62 L160,-62" stroke="#2f6fd6" stroke-width="8"/><path d="M20,-58 L-50,0 L-14,0 L64,-50 Z" fill="#c9d3e3"/></g>`;
+      const TAIL = `<g style="filter: drop-shadow(0 0 16px rgba(255,155,69,0.5))"><path d="M-120,40 L60,40 C90,40 110,20 110,0 C110,-20 90,-40 60,-40 L-60,-40 Z" fill="#dfe6ef" stroke="${INK}" stroke-width="6"/><path d="M-60,-40 L-120,-190 L-60,-190 L20,-40 Z" fill="#dfe6ef" stroke="${INK}" stroke-width="6"/><path d="M-96,-130 L-50,-130" stroke="#e63946" stroke-width="16"/><path d="M-120,40 L-150,70 L-150,10 Z" fill="#9aa5b8" stroke="${INK}" stroke-width="6"/></g>`;
+      const CAPSULE = `<g style="filter: drop-shadow(0 0 16px rgba(255,155,69,0.5))"><rect x="210" y="430" width="200" height="190" rx="70" fill="#1a2240" stroke="#ff9b45" stroke-width="5"/><rect x="330" y="470" width="70" height="140" rx="12" fill="#05070f" stroke="#ff9b45" stroke-width="4"/><rect x="400" y="606" width="90" height="14" rx="5" fill="#d9a441" stroke="${INK}" stroke-width="4"/><line x1="310" y1="430" x2="310" y2="330" stroke="#c9d3e3" stroke-width="4"/></g>`;
+      const ISS = `<g><rect x="-60" y="-9" width="120" height="18" fill="#cfd6e2" stroke="${INK}" stroke-width="4"/><rect x="-104" y="-40" width="48" height="80" fill="#2f6fd6" stroke="${INK}" stroke-width="4"/><rect x="56" y="-40" width="48" height="80" fill="#2f6fd6" stroke="${INK}" stroke-width="4"/><rect x="-20" y="-22" width="40" height="44" rx="8" fill="#eef2f8" stroke="${INK}" stroke-width="4"/></g>`;
+
+      // ---------- Build HUD ----------
+      const LEVELS = ['1 M', '15 M', '450 M', '10 KM', '39 KM', '400 KM'];
+      const LEVEL_AT = [[B.d1, B.d1land], [B.d15, B.d15land + 0.1], [B.sky, B.max], [B.high, B.high + 2.2], [B.felix, B.mach], [B.iss, B.orbit + 0.6]];
+      const tracker = new K.Tracker($('hud'), 'HOW FAR DO YOU FALL?', LEVELS, {compact: true});
+      const caps = new K.Captions($('caps'), T.lines);
+      const globe = new K.Globe($('globe'));
+      const gctx = $('globe').getContext('2d');
+      const fx = $('fx').getContext('2d');
+      const bg = $('bg').getContext('2d');
+      const hits = [
+        {at: B.d1land, amp: 8},
+        {at: B.d3land, amp: 14},
+        {at: B.d15land, amp: 26},
+        {at: B.max, amp: 16},
+        {at: B.mach, amp: 22},
+        {at: B.sky, amp: 8},
+      ];
+      const glitches = [{at: B.title + 0.12, dur: 0.3}];
+      const THROWS = [
+        {at: B.throw1, land: 0.55, speed: 7000},
+        {at: B.throw2, land: 1.25, speed: 15000},
+        {at: B.throw3, land: 2.35, speed: 22000},
+        {at: B.orbit, land: null, speed: 27600},
+      ];
+
+      function render(t) {
+        const shake = K.shake(t, hits);
+        const glitch = K.pulse(t, glitches);
+        const scene = $('scene');
+        scene.style.transform = `translate(${shake.x + glitch * 18 * Math.sin(t * 190)}px, ${shake.y}px)`;
+        scene.style.filter =
+          [glitch > 0.05 ? `drop-shadow(${10 * glitch}px 0 0 rgba(255,0,60,0.7)) drop-shadow(${-10 * glitch}px 0 0 rgba(0,220,255,0.7))` : ''].filter(Boolean).join(' ') || 'none';
+        $('bands').style.opacity = glitch;
+
+        const inGround = t >= B.d1 && t < B.sky;
+        const inSky = (t < B.d1 || (t >= B.sky && t < B.felix) || (t >= B.brake && t < B.iss + 0.5) || t >= B.dive + 0.2);
+        const inSpace = t >= B.felix && t < B.brake;
+        const v = speedAt(t);
+
+        // Background
+        const [top, bot] = skyAt(t);
+        const g = bg.createLinearGradient(0, 0, 0, 1920);
+        g.addColorStop(0, `rgb(${top})`);
+        g.addColorStop(1, `rgb(${bot})`);
+        bg.fillStyle = g;
+        bg.fillRect(0, 0, 1080, 1920);
+        const spaceA = Math.max(seg(t, B.felix - 0.2, B.felix + 0.3) * (1 - seg(t, B.brake, B.brake + 1.2)), seg(t, B.iss, B.iss + 0.6) * (1 - seg(t, B.dive + 0.2, B.dive + 0.6)));
+        K.stars(bg, t, {dur: DUR, alpha: 0.35 + 0.65 * spaceA});
+        const falling = !inGround && t < B.iss + 0.3 || t >= B.dive + 0.2;
+        if (falling) {
+          const fast = t >= B.jump && t < B.brake ? 1 : 0;
+          K.streaks(bg, t, {dur: DUR, vertical: true, n: 24 + fast * 12, alpha: 0.32 + fast * 0.2, minLen: 120, maxLen: 520, speed: 1.4 + fast * 1.6, thick: 3});
+          const cloudA = (1 - spaceA) * (t >= B.vul && t < B.felix ? 0.35 : 0.55);
+          K.clouds(bg, t, {dur: DUR, alpha: cloudA, speed: 1.5, size: 1.1});
+        } else if (inGround) {
+          K.streaks(bg, t, {dur: DUR, n: 16, alpha: 0.18});
+        }
+
+        // Globe: night ground, Earth's curve, the planet
+        gctx.clearRect(0, 0, 1080, 1920);
+        const gv = globeView(t);
+        if (gv) {
+          const atmo = t >= B.felix && t < B.iss ? lerp(40, 260, ease.inOut(seg(t, B.brake, B.brake + 2))) : 120;
+          const ag = gctx.createRadialGradient(gv.cx, gv.cy, gv.r, gv.cx, gv.cy, gv.r + atmo);
+          ag.addColorStop(0, 'rgba(70,150,255,0.55)');
+          ag.addColorStop(1, 'rgba(70,150,255,0)');
+          gctx.fillStyle = ag;
+          gctx.beginPath();
+          gctx.arc(gv.cx, gv.cy, gv.r + atmo, 0, Math.PI * 2);
+          gctx.fill();
+          const ga = t >= B.dive ? 1 - seg(t, B.dive + 0.3, B.dive + 0.7) : 1;
+          globe.draw({...gv, dot: Math.min(16, Math.max(1.8, gv.r * 0.0068)), alpha: ga});
+          gctx.save();
+          gctx.globalAlpha = ga;
+          gctx.strokeStyle = '#8cc8ff';
+          gctx.shadowColor = '#4a9cff';
+          gctx.shadowBlur = 26;
+          gctx.lineWidth = 4;
+          gctx.beginPath();
+          gctx.arc(gv.cx, gv.cy, gv.r, Math.PI * 1.15, Math.PI * 1.85);
+          gctx.stroke();
+          gctx.restore();
+        }
+
+        // FX: coin glow, sonic rings, throws and orbit
+        fx.clearRect(0, 0, 1080, 1920);
+        K.burst(fx, t, B.d15land, {x: 620, y: 1180, n: 22, seed: 4, speed: [160, 520], angle: [-3.0, -0.15], g: 900, life: 0.8, size: [10, 22], fill: '#3a4a6a', stroke: '#0b1020'});
+        K.burst(fx, t, B.d3land, {x: 620, y: 1180, n: 10, seed: 9, speed: [100, 300], angle: [-3.0, -0.15], g: 900, life: 0.5, size: [6, 12], fill: '#3a4a6a', stroke: '#0b1020'});
+        for (let i = 0; i < 3; i++) {
+          const p = seg(t, B.mach + i * 0.12, B.mach + 1.0 + i * 0.12);
+          if (p <= 0 || p >= 1) continue;
+          fx.save();
+          fx.strokeStyle = '#ffffff';
+          fx.shadowColor = '#bfe6ff';
+          fx.shadowBlur = 20;
+          fx.globalAlpha = 1 - p;
+          fx.lineWidth = 10 * (1 - p) + 2;
+          fx.beginPath();
+          fx.arc(540, 860, 60 + p * 900, 0, Math.PI * 2);
+          fx.stroke();
+          fx.restore();
+        }
+        let issPos = null;
+        if (t >= B.iss && t < B.dive + 0.3) {
+          const P = {cx: 540, cy: PLANET.cy, R: PLANET.r, O: 350};
+          const show = seg(t, B.iss + 0.6, B.iss + 0.9) * (1 - seg(t, B.dive, B.dive + 0.25));
+          fx.save();
+          fx.globalAlpha = show;
+          fx.setLineDash([12, 14]);
+          fx.strokeStyle = 'rgba(255,255,255,0.3)';
+          fx.lineWidth = 3;
+          fx.beginPath();
+          fx.arc(P.cx, P.cy, P.O, 0, Math.PI * 2);
+          fx.stroke();
+          fx.setLineDash([]);
+          // Each throw: drops from orbit height to the ground; the last one never lands.
+          THROWS.forEach((th, i) => {
+            const prog = seg(t, th.at, th.at + (th.land ? 0.65 : 1.3));
+            if (prog <= 0) return;
+            const fade = th.land ? 1 - seg(t, th.at + 1.6, th.at + 2.2) : 1;
+            const end = th.land ? th.land : Math.PI * 2;
+            const path = [];
+            const steps = 80;
+            for (let k = 0; k <= steps * prog; k++) {
+              const a = (k / steps) * end;
+              const r = th.land ? P.O - (P.O - P.R) * Math.pow(a / th.land, 2) : P.O;
+              path.push([P.cx + r * Math.sin(a), P.cy - r * Math.cos(a)]);
+            }
+            fx.globalAlpha = show * fade;
+            fx.strokeStyle = th.land ? '#ff9b45' : '#40d8e8';
+            fx.shadowColor = fx.strokeStyle;
+            fx.shadowBlur = 20;
+            fx.lineWidth = 7;
+            fx.lineCap = 'round';
+            fx.beginPath();
+            path.forEach(([x, y], k) => (k ? fx.lineTo(x, y) : fx.moveTo(x, y)));
+            fx.stroke();
+            const [bx, by] = path[path.length - 1];
+            if (th.land || t < B.orbit + 1.3) {
+              fx.fillStyle = '#fff';
+              fx.beginPath();
+              fx.arc(bx, by, 11, 0, Math.PI * 2);
+              fx.fill();
+            }
+            if (th.land && prog >= 1) {
+              const pp = seg(t, th.at + 0.65, th.at + 1.0);
+              fx.strokeStyle = '#ff9b45';
+              fx.globalAlpha = show * (1 - pp);
+              fx.lineWidth = 4;
+              fx.beginPath();
+              fx.arc(bx, by, 10 + pp * 50, 0, Math.PI * 2);
+              fx.stroke();
+            }
+          });
+          fx.restore();
+          // The Space Station: orbits before the explanation, then the last throw becomes it.
+          const before = t < B.throw1;
+          const after = t >= B.orbit + 1.3;
+          if (before || after) {
+            const a = before ? lerp(-1.2, 0, seg(t, B.iss, B.throw1)) : ((t - (B.orbit + 1.3)) / 2.2) * Math.PI * 2;
+            issPos = {x: P.cx + P.O * Math.sin(a), y: P.cy - P.O * Math.cos(a), a, o: show * (before ? 1 - seg(t, B.throw1 - 0.25, B.throw1) : seg(t, B.orbit + 1.3, B.orbit + 1.5))};
+          }
+        }
+
+        // ---------- Stage ----------
+        let svg = '';
+        const tumble = 8 * loopSin(t, 6);
+        const flap = 10 * loopSin(t, 30);
+        const fallPose = {...K.POSES.fall, lSh: K.POSES.fall.lSh - flap, rSh: K.POSES.fall.rSh + flap};
+        const helmet = t >= B.felix && t < B.iss;
+        const skyFaller = (t < B.d1 || (t >= B.sky && t < B.vul) || (t >= B.jump + 0.6 && t < B.iss + 0.3) || t >= B.dive + 0.2);
+        if (skyFaller) {
+          const a = t >= B.dive + 0.2 ? seg(t, B.dive + 0.2, B.dive + 0.6) : t >= B.iss ? 1 - seg(t, B.iss, B.iss + 0.3) : 1;
+          const scared = t >= B.sky && t < B.vul;
+          const trail = [];
+          for (let i = 4; i >= 1; i--) trail.push({pose: fallPose, x: 540, y: 860 - i * 26, rot: 8 * loopSin(t - i * 0.05, 6), s: 1.05});
+          svg += `<g opacity="${a}">${K.trail(trail, {alpha: 0.4})}<g transform="translate(540,860) rotate(${tumble}) scale(1.05)">${K.stick(fallPose, {anchor: 'hip', hat: helmet ? 'helmet' : 'bowler', eyes: scared || helmet ? 'wide' : 'dot', mouth: scared ? 'grit' : 'o'})}</g></g>`;
+        }
+        if (inGround) {
+          const gy = 1180;
+          if (t < B.d3) {
+            svg += CRATE;
+            const p = seg(t, B.d1fall, B.d1land);
+            const x = t < B.d1fall ? 460 : lerp(460, 640, p);
+            const y = t < B.d1fall ? 1015 : lerp(1015, gy, ease.in(p));
+            const pose = t < B.d1fall ? K.POSES.stand : t < B.d1land ? K.POSES.jump : t < B.d1land + 0.1 ? K.POSES.land : K.POSES.thumbs;
+            svg += `<g transform="translate(${x},${y}) scale(0.9)">${K.stick(pose, {mouth: t < B.d1land ? 'o' : 'smile', eyes: t >= B.d1fall && t < B.d1land ? 'wide' : 'dot', fist: t >= B.d1land + 0.1})}</g>`;
+          } else if (t < B.d15) {
+            svg += WALL;
+            const p = seg(t, B.d3fall, B.d3land);
+            const x = t < B.d3fall ? 390 : lerp(390, 640, p);
+            const y = t < B.d3fall ? 685 : lerp(685, gy, ease.in(p));
+            const pose = t < B.d3fall ? K.POSES.stand : t < B.d3land ? K.POSES.jump : K.POSES.ouch;
+            svg += `<g transform="translate(${x},${y}) scale(0.9)">${K.stick(pose, {mouth: t < B.d3land ? 'o' : 'grit', eyes: t >= B.d3fall ? 'wide' : 'dot'})}</g>`;
+          } else {
+            const cam = cam15(t);
+            const p = seg(t, B.d15fall, B.d15land);
+            const x = t < B.d15fall ? 430 : lerp(430, 640, p);
+            const y = t < B.d15fall ? -320 : lerp(-320, gy, ease.in(p));
+            const pose = t < B.d15fall ? K.POSES.stand : t < B.d15land ? K.POSES.jump : K.POSES.land;
+            svg += `<g transform="translate(0,${cam})">${BUILDING}<g transform="translate(${x},${y}) scale(0.62)">${K.stick(pose, {mouth: 'o', eyes: t >= B.d15land ? 'x' : t >= B.d15fall ? 'wide' : 'dot'})}</g></g>`;
+            // The coin flip
+            const cp = seg(t, B.d15land + 0.1, B.d15land + 0.25);
+            if (cp > 0) {
+              const spin = Math.cos(Math.max(0, t - B.d15land - 0.1) * 24);
+              svg += `<g transform="translate(540,520) scale(${spin * ease.out(cp)},${ease.out(cp)})" style="filter: drop-shadow(0 0 26px rgba(255,210,63,0.8))"><circle r="130" fill="#ffd23f" stroke="${INK}" stroke-width="9"/><circle r="102" fill="none" stroke="#c99a1d" stroke-width="7"/><text y="30" fill="${INK}" font-family="Anton" font-size="84" text-anchor="middle" transform="${spin < 0 ? 'scale(-1,1)' : ''}">${spin >= 0 ? 'LIVE' : 'DIE'}</text></g>`;
+            }
+          }
+        }
+        // Force arrows
+        if (t >= B.arrows && t < B.high) {
+          const a = seg(t, B.arrows, B.arrows + 0.2) * (1 - seg(t, B.high - 0.2, B.high));
+          const gl = ease.out(seg(t, B.arrows + 0.05, B.arrows + 0.35));
+          const al = ease.inOut(seg(t, B.arrows + 0.4, B.equal));
+          svg += `<g opacity="${a}">
+            <g transform="translate(790,700)" style="filter: drop-shadow(0 0 16px rgba(248,40,56,0.8))"><g transform="scale(1,${gl})"><line x1="0" y1="0" x2="0" y2="250" stroke="#f82838" stroke-width="22" stroke-linecap="round"/><path d="M-34,230 L0,290 L34,230 Z" fill="#f82838"/></g></g>
+            <g transform="translate(290,990)" style="filter: drop-shadow(0 0 16px rgba(64,216,232,0.8))"><g transform="scale(1,${al})"><line x1="0" y1="0" x2="0" y2="-250" stroke="#40d8e8" stroke-width="22" stroke-linecap="round"/><path d="M-34,-230 L0,-290 L34,-230 Z" fill="#40d8e8"/></g></g>
+          </g>`;
+        }
+        // Airliner at 10 km
+        const jp = seg(t, B.jet, B.jet + 1.7);
+        if (jp > 0 && jp < 1) svg += `<g transform="translate(${lerp(-420, 1500, jp)},${1090 + 12 * Math.sin(jp * 6)}) scale(1.05)">${JET}</g>`;
+        // Vulović's tail section
+        if (t >= B.vul && t < B.felix) {
+          const tp = seg(t, B.vul, B.vul + 0.7);
+          svg += `<g transform="translate(540,${lerp(-300, 880, ease.out(tp)) + Math.max(0, t - B.vul - 0.7) * 25}) rotate(${t * 140})">${TAIL}</g>`;
+        }
+        // Baumgartner's capsule and jump
+        if (t >= B.felix && t < B.jump + 0.6) {
+          const cap = seg(t, B.felix, B.felix + 0.3) * (1 - seg(t, B.jump + 0.3, B.jump + 0.6));
+          svg += `<g opacity="${cap}">${CAPSULE}</g>`;
+          const p = seg(t, B.jump, B.jump + 0.6);
+          const x = lerp(440, 540, p), y = lerp(606, 860, ease.in(p)) - Math.sin(p * Math.PI) * 60;
+          const pose = t < B.jump ? K.POSES.stand : K.lerpPose(K.POSES.jump, fallPose, p);
+          svg += `<g transform="translate(${x},${y}) rotate(${p * 25}) scale(${lerp(0.7, 1.05, p)})">${K.stick(pose, {anchor: t < B.jump ? 'feet' : 'hip', hat: 'helmet', eyes: 'wide', mouth: 'o'})}</g>`;
+        }
+        // Thrower at orbit height, and the station
+        if (t >= B.throw1 - 0.3 && t < B.dive + 0.2) {
+          const a = seg(t, B.throw1 - 0.3, B.throw1) * (1 - seg(t, B.orbit + 1.2, B.orbit + 1.5));
+          svg += `<g opacity="${a}" transform="translate(540,${PLANET.cy - 350 - 4}) scale(0.32)"><rect x="-90" y="0" width="180" height="22" rx="8" fill="#d9a441" stroke="${INK}" stroke-width="6"/>${K.stick(K.POSES.point, {mouth: 'smile'})}</g>`;
+        }
+        if (issPos && issPos.o > 0) {
+          svg += `<g opacity="${issPos.o}" transform="translate(${issPos.x},${issPos.y}) rotate(${(issPos.a * 180) / Math.PI})" style="filter: drop-shadow(0 0 14px rgba(120,190,255,0.8))">${ISS}</g>`;
+        }
+        $('stage').innerHTML = svg;
+
+        // ---------- DOM elements ----------
+        const titleOn = t < B.title ? pop(t, -1, B.d1 - 0.1) : pop(t, B.title, Infinity, 0.25);
+        apply($('title'), titleOn);
+        apply($('titlePill'), t < B.title ? pop(t, -1, B.d1 - 0.1) : pop(t, B.title + 0.12, Infinity, 0.25));
+
+        const speedOn = t < B.felix ? pop(t, B.sky + 0.1, B.arrows) : pop(t, B.jump + 0.2, B.iss);
+        apply($('speed'), speedOn);
+        apply($('speedLabelWrap'), speedOn);
+        $('speedNum').textContent = fmt(v);
+        $('speedNum').className = `num ${t >= B.brake && v < 400 ? 'glow-cyan' : 'glow-coral'}`;
+        apply($('maxStamp'), pop(t, B.max, B.arrows, 0.14), 'rotate(-6deg)');
+        apply($('machStamp'), pop(t, B.mach, B.brake, 0.14), 'rotate(-6deg)');
+
+        const hOn = pop(t, B.high + 0.1, B.vul);
+        apply($('height'), hOn);
+        apply($('heightLabelWrap'), hOn);
+        $('heightNum').textContent = fmt(heightAt(t));
+        apply($('speedPill'), pop(t, B.high + 0.4, B.vul));
+
+        apply($('fallenChip'), pop(t, B.sky + 0.3, B.arrows));
+        $('fallenVal').textContent = `${fmt(heightAt(t))} M`;
+
+        apply($('impactTag'), t < B.d3 ? pop(t, B.d1land, B.d3) : t < B.d15 ? pop(t, B.d3land, B.d15) : pop(t, B.d15land + 0.05, B.sky));
+        $('impactVal').textContent = `${fmt(v)} KM/H`;
+        const tagX = t < B.d15 ? 640 : 640;
+        $('impactTag').style.left = `${tagX - 80}px`;
+        $('impactTag').style.top = `${t < B.d15 ? 790 : 900}px`;
+        apply($('okShout'), pop(t, B.d1land + 0.1, B.d3), 'rotate(-6deg)');
+        $('okShout').style.left = '700px';
+        $('okShout').style.top = '930px';
+        apply($('crackShout'), pop(t, B.d3land, B.d15, 0.12), 'rotate(-8deg)');
+        $('crackShout').style.left = '700px';
+        $('crackShout').style.top = '1080px';
+        apply($('survival'), pop(t, B.d15land + 0.35, B.sky, 0.14), 'rotate(-6deg)');
+
+        apply($('gbars'), pop(t, B.arrows + 0.1, B.high));
+        $('gFill').style.width = `${100 * ease.out(seg(t, B.arrows + 0.1, B.arrows + 0.4))}%`;
+        $('aFill').style.width = `${100 * ease.inOut(seg(t, B.arrows + 0.4, B.equal))}%`;
+        apply($('infoEqual'), pop(t, B.equal, B.high));
+
+        apply($('jetPill'), pop(t, B.jet + 0.3, B.jet + 1.6));
+        $('jetPill').style.left = `${lerp(-420, 1500, jp) - 210}px`;
+        $('jetPill').style.top = '870px';
+
+        apply($('vulPill'), pop(t, B.vul + 0.3, B.felix));
+        apply($('vulPill2'), pop(t, B.vul + 0.55, B.felix));
+        apply($('recordStamp'), pop(t, B.record, B.felix, 0.14), 'rotate(-6deg)');
+        apply($('felixPill'), pop(t, B.felix + 0.1, B.mach));
+        apply($('felixShout'), pop(t, B.jump + 0.7, B.mach), 'rotate(-6deg)');
+        $('felixShout').style.left = '640px';
+        $('felixShout').style.top = '1050px';
+        apply($('infoBrake'), pop(t, B.brake + 0.8, B.iss));
+
+        // ISS counter and labels
+        let thr = 27600;
+        for (const th of THROWS) if (t >= th.at) thr = th.speed;
+        const throwOn = pop(t, B.iss + 0.6, B.dive);
+        apply($('throw'), throwOn);
+        apply($('throwLabelWrap'), throwOn);
+        $('throwLabel').textContent = t < B.throw1 ? 'SPACE STATION SPEED' : 'THROWN SIDEWAYS AT';
+        $('throwNum').textContent = fmt(t < B.throw1 ? 27600 : thr);
+        $('throwNum').className = `num ${t < B.throw1 || t >= B.orbit ? 'glow-cyan' : 'glow-orange'}`;
+        apply($('orbitStamp'), pop(t, B.orbit + 0.7, B.dive, 0.14), 'rotate(-6deg)');
+        apply($('infoOrbit'), pop(t, B.orbit + 0.9, B.dive));
+        apply($('issPill'), issPos && issPos.o > 0.05 ? {vis: issPos.o, scale: 1, blur: 0} : {vis: 0, scale: 1, blur: 0});
+        if (issPos) {
+          $('issPill').style.left = `${issPos.x + 60}px`;
+          $('issPill').style.top = `${issPos.y - 32}px`;
+        }
+
+        // HUD
+        const states = LEVEL_AT.map(([a, done]) => (t >= done ? ['ok', seg(t, done, done + 0.3)] : t >= a ? 'active' : 'pending'));
+        tracker.set(states, pop(t, B.d1 + 0.1, B.dive).vis);
+        caps.set(t);
+
+        $('flash').style.background = '#fff';
+        const fl = (at, d, pk) => (t >= at && t < at + d ? pk * (1 - (t - at) / d) : 0);
+        $('flash').style.opacity = Math.max(fl(B.d15land, 0.15, 0.55), fl(B.sky, 0.1, 0.4), fl(B.mach, 0.22, 0.6), fl(B.iss, 0.1, 0.35), fl(B.dive + 0.35, 0.15, 0.4));
+      }
+
+      const tl = gsap.timeline({paused: true});
+      tl.to({}, {duration: DUR, ease: 'none', onUpdate: () => render(tl.time())}, 0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines['main'] = tl;
+      tl.seek(0);
+      render(0);
+    </script>
+  </body>
+</html>
