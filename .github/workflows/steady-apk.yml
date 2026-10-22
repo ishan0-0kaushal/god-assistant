@@ -1,0 +1,34 @@
+name: Steady APK
+
+on:
+  push:
+    paths: ['steady/**', '.github/workflows/steady-apk.yml']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: steady
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: steady/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npx tsc --noEmit && npm test
+      - run: npx expo prebuild -p android --no-install
+      # Release build, signed with the template's debug key — installable for personal use.
+      - run: ./gradlew assembleRelease --no-daemon
+        working-directory: steady/android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Steady-apk
+          path: steady/android/app/build/outputs/apk/release/app-release.apk
