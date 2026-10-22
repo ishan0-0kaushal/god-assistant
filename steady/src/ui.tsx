@@ -24,7 +24,7 @@ export function Link({ label, onPress }: { label: string; onPress: () => void })
 }
 
 const s = StyleSheet.create({
-  btn: { backgroundColor: c.accent, borderRadius: 16, paddingVertical: 18, alignItems: 'center' },
+  btn: { backgroundColor: c.accent, borderRadius: 18, paddingVertical: 18, alignItems: 'center' },
   ghost: { backgroundColor: 'transparent', borderWidth: 1, borderColor: c.line },
   off: { backgroundColor: c.surface, borderColor: c.surface },
   label: { color: c.bg, fontSize: 16, fontWeight: '600', letterSpacing: 0.2 },

@@ -43,9 +43,10 @@ class BlockScreen(private val ctx: Context, private val actions: Actions) {
   companion object {
     private const val BG = "#0B0B0D"
     private const val SURFACE = "#16161A"
-    private const val LINE = "#2A2A31"
+    private const val LINE = "#2E2E35"
     private const val TEXT = "#F4F4F5"
-    private const val DIM = "#8A8A93"
+    private const val DIM = "#9A9AA3"
+    private const val CALM = "#8AB4F8"
     private const val POMODORO_MS = 25 * 60_000L
 
     fun duration(ms: Long): String {
@@ -91,7 +92,7 @@ class BlockScreen(private val ctx: Context, private val actions: Actions) {
   }
 
   private fun detailText(m: Model) =
-    if (m.focus) "${clock(m.focusLeftMs)} left in your focus session."
+    if (m.focus) clock(m.focusLeftMs)
     else "You used ${duration(m.usedMs)} (limit ${duration(m.limitMinutes * 60_000L)}). " +
       "Back at midnight, in ${duration(m.toMidnightMs)}."
 
@@ -114,7 +115,7 @@ class BlockScreen(private val ctx: Context, private val actions: Actions) {
 
   private fun rounded(fill: String, stroke: String? = null) = GradientDrawable().apply {
     setColor(Color.parseColor(fill))
-    cornerRadius = dp(16).toFloat()
+    cornerRadius = dp(18).toFloat()
     stroke?.let { setStroke(dp(1), Color.parseColor(it)) }
   }
 
@@ -140,12 +141,14 @@ class BlockScreen(private val ctx: Context, private val actions: Actions) {
         layoutParams = LinearLayout.LayoutParams(dp(56), dp(56))
       })
     }
-    if (m.focus) root.addView(block(text("FOCUSING", 12f, DIM, bold = true).apply { letterSpacing = 0.15f }, 20))
+    if (m.focus) root.addView(block(text("FOCUSING", 12f, CALM, bold = true).apply { letterSpacing = 0.15f }, 20))
     root.addView(block(
       text(if (m.focus) "${m.label} can wait." else "${m.label} is done for today.", 26f, TEXT, bold = true),
       if (m.focus) 6 else 20
     ))
-    val detail = block(text("", 15f, DIM), 10)
+    // Focus: the countdown is the screen. Limit: one quiet line of facts.
+    val detail = block(if (m.focus) text("", 52f, TEXT).apply { typeface = Typeface.create("sans-serif-light", Typeface.NORMAL) }
+      else text("", 15f, DIM), if (m.focus) 24 else 10)
     this.detail = detail
     root.addView(detail)
 
@@ -155,7 +158,10 @@ class BlockScreen(private val ctx: Context, private val actions: Actions) {
         background = rounded(SURFACE)
         setPadding(dp(20), dp(16), dp(20), dp(18))
         addView(text("YOU SAID", 11f, DIM, bold = true).apply { letterSpacing = 0.15f })
-        addView(text("“${m.why.trim()}”", 18f, TEXT).apply { setPadding(0, dp(6), 0, 0) })
+        addView(text("“${m.why.trim()}”", 20f, TEXT).apply {
+          typeface = Typeface.create(Typeface.SERIF, Typeface.ITALIC)
+          setPadding(0, dp(8), 0, 0)
+        })
       }, 28))
     }
 

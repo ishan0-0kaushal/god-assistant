@@ -1,7 +1,7 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Native, { InstalledApp, Permissions, State, Usage } from '../../modules/steady-native';
-import { c } from '../theme';
+import { c, quote } from '../theme';
 import { Button, Link } from '../ui';
 import { allowedMs, changeLimit, fmtDuration, pomodoros, suggestLimit, topReasons } from '../limits';
 import { DAY, appMap, focusMs, todayStart, weeklyAverage } from '../usage';
@@ -19,13 +19,17 @@ type Props = {
 
 export default function Today({ state, perms, onChange, onLimits, onFocus, onPerms, onDisable }: Props) {
   const [usage, setUsage] = useState<Usage | null>(null);
+  const [lastWeek, setLastWeek] = useState<number | null>(null);
   const [apps, setApps] = useState<Record<string, InstalledApp>>({});
   const [avg, setAvg] = useState<Record<string, number>>({});
   const log = Native.getLog();
   const now = Date.now();
 
   const load = useCallback(() => {
-    Native.getUsage(todayStart(), Date.now()).then(setUsage);
+    const now = Date.now();
+    Native.getUsage(todayStart(now), now).then(setUsage);
+    // Same stretch of the day, one week ago.
+    Native.getUsage(todayStart(now) - 7 * DAY, now - 7 * DAY).then((u) => setLastWeek(u.totalMs));
   }, []);
 
   useEffect(() => {
@@ -75,11 +79,12 @@ export default function Today({ state, perms, onChange, onLimits, onFocus, onPer
 
       <Text style={s.kicker}>TODAY ON YOUR PHONE</Text>
       <Text style={s.big}>{fmtDuration(total)}</Text>
-      <Text style={s.dim}>
-        {usage ? `${usage.pickups} pickups · ` : ''}
-        {pomodoros(total) ? `${pomodoros(total)} Pomodoros' worth · ` : ''}
-        {fmtDuration(focus)} focused
-      </Text>
+      <View style={s.tiles}>
+        <Tile value={usage ? String(usage.pickups) : '—'} label="pickups" />
+        <Tile value={fmtDuration(focus)} label="focused" color={c.calm} />
+        <Tile value={lastWeek === null || !usage ? '—' : delta(total - lastWeek)} label="vs last week" />
+      </View>
+      {pomodoros(total) > 0 && <Text style={[s.dim, { marginTop: 10 }]}>That's {pomodoros(total)} Pomodoros of study time.</Text>}
 
       <View style={{ marginTop: 28 }}>
         <Button label={running ? 'Back to focus' : 'Start a focus session'} onPress={onFocus} />
@@ -139,9 +144,24 @@ export default function Today({ state, perms, onChange, onLimits, onFocus, onPer
         </Section>
       )}
 
-      {state.why ? <Text style={s.why}>“{state.why}”</Text> : null}
+      {state.why ? <Text style={[s.why, quote]}>“{state.why}”</Text> : null}
       {state.enabled && <Link label="Turn off Steady" onPress={onDisable} />}
     </ScrollView>
+  );
+}
+
+/** "−38m" / "+1h 5m" / "same". */
+function delta(ms: number): string {
+  if (Math.abs(ms) < 60_000) return 'same';
+  return `${ms < 0 ? '−' : '+'}${fmtDuration(Math.abs(ms))}`;
+}
+
+function Tile({ value, label, color = c.text }: { value: string; label: string; color?: string }) {
+  return (
+    <View style={s.tile}>
+      <Text style={[s.tileValue, { color }]} numberOfLines={1}>{value}</Text>
+      <Text style={s.tileLabel}>{label}</Text>
+    </View>
   );
 }
 
@@ -168,6 +188,10 @@ const s = StyleSheet.create({
   kicker: { color: c.dim, fontSize: 12, fontWeight: '600', letterSpacing: 1.2 },
   big: { color: c.text, fontSize: 56, fontWeight: '200', marginTop: 4, fontVariant: ['tabular-nums'] },
   dim: { color: c.dim, fontSize: 14, lineHeight: 20 },
+  tiles: { flexDirection: 'row', gap: 8, marginTop: 14 },
+  tile: { flex: 1, backgroundColor: c.surface, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14 },
+  tileValue: { fontSize: 18, fontWeight: '600', fontVariant: ['tabular-nums'] },
+  tileLabel: { color: c.dim, fontSize: 12, marginTop: 2 },
   section: { marginTop: 36, gap: 14 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -177,5 +201,5 @@ const s = StyleSheet.create({
   fill: { height: '100%' },
   add: { color: c.calm, fontSize: 14, fontWeight: '600' },
   reason: { color: c.text, fontSize: 15, lineHeight: 22 },
-  why: { color: c.dim, fontSize: 15, fontStyle: 'italic', textAlign: 'center', marginTop: 40, marginBottom: 12, lineHeight: 22 },
+  why: { color: c.dim, fontSize: 17, textAlign: 'center', marginTop: 40, marginBottom: 12, lineHeight: 22 },
 });

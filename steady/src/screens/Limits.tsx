@@ -73,7 +73,7 @@ export default function Limits({ state, onChange, onBack }: Props) {
                 )}
               </View>
               {p ? (
-                <View style={s.row}>
+                <View style={[s.row, s.pill]}>
                   <Text style={s.pending}>
                     {p.minutes === null
                       ? `Removed at midnight. Until then: ${fmtDuration(current * 60_000)}`
@@ -110,14 +110,15 @@ function Step({ label, onPress, disabled }: { label: string; onPress: () => void
 
 const s = StyleSheet.create({
   list: { paddingHorizontal: 24, gap: 12, paddingBottom: 24 },
-  card: { backgroundColor: c.surface, borderRadius: 16, padding: 16, gap: 12 },
+  card: { backgroundColor: c.surface, borderRadius: 18, padding: 16, gap: 12 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   label: { flex: 1, color: c.text, fontSize: 15 },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  step: { width: 34, height: 34, borderRadius: 17, borderWidth: 1, borderColor: c.line, alignItems: 'center', justifyContent: 'center' },
+  step: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, borderColor: c.line, alignItems: 'center', justifyContent: 'center' },
   stepText: { color: c.text, fontSize: 18 },
   value: { color: c.text, fontSize: 15, minWidth: 56, textAlign: 'center', fontVariant: ['tabular-nums'] },
-  pending: { flex: 1, color: c.warn, fontSize: 13, lineHeight: 18 },
+  pill: { backgroundColor: '#2A2113', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12 },
+  pending: { flex: 1, color: '#FFC970', fontSize: 13, lineHeight: 18 },
   action: { color: c.calm, fontSize: 14, fontWeight: '600' },
   remove: { color: c.dim, fontSize: 13 },
   footer: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 16, gap: 10 },

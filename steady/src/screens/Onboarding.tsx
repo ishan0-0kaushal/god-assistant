@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import Native, { InstalledApp } from '../../modules/steady-native';
-import { c } from '../theme';
+import { c, quote } from '../theme';
 import { Button } from '../ui';
 import { fmtDuration, suggestLimit } from '../limits';
 import { weeklyAverage } from '../usage';
@@ -56,7 +56,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
         />
         <View style={s.body}>
           <TextInput
-            style={s.input}
+            style={[s.input, quote]}
             multiline
             value={why}
             onChangeText={setWhy}
@@ -66,6 +66,11 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
             selectionColor={c.calm}
             maxLength={140}
           />
+          <Text style={s.count}>{why.length} / 140</Text>
+          <View style={s.note}>
+            <Text style={s.noteText}>Stays on this phone. Steady has no account, no server and no analytics.</Text>
+          </View>
+          <View style={{ flex: 1 }} />
           <Button label="Next" disabled={why.trim().length < MIN_WHY} onPress={() => setStep('apps')} />
         </View>
       </KeyboardAvoidingView>
@@ -113,10 +118,13 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
 }
 
 const s = StyleSheet.create({
-  body: { flex: 1, paddingHorizontal: 24, paddingBottom: 16, justifyContent: 'space-between' },
+  body: { flex: 1, paddingHorizontal: 24, paddingBottom: 16 },
+  count: { color: c.dim, fontSize: 12, alignSelf: 'flex-end', marginTop: 8 },
+  note: { backgroundColor: c.surface, borderRadius: 16, padding: 16, marginTop: 20 },
+  noteText: { color: c.dim, fontSize: 13, lineHeight: 19 },
   input: {
-    color: c.text, fontSize: 18, lineHeight: 26, backgroundColor: c.surface, borderRadius: 14,
-    borderWidth: 1, borderColor: c.line, padding: 16, minHeight: 140,
+    color: c.text, fontSize: 21, lineHeight: 30, backgroundColor: c.surface, borderRadius: 18,
+    borderWidth: 1, borderColor: c.calm, padding: 18, minHeight: 140,
   },
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, gap: 14 },
   label: { color: c.text, fontSize: 15 },

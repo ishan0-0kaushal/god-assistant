@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BackHandler, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import Native, { State } from '../../modules/steady-native';
-import { c } from '../theme';
+import { c, quote } from '../theme';
 import { Button, Link } from '../ui';
 import { useNow } from '../hooks';
 import { END_FOCUS_WAIT_SECONDS, POMODORO_MINUTES, STRICT_FROM_MINUTES, fmtClock } from '../limits';
@@ -75,10 +75,10 @@ export default function Focus({ state, onChange, onBack }: Props) {
       <View style={[s.pad, { justifyContent: 'space-between' }]}>
         <View />
         <View style={{ alignItems: 'center', gap: 12 }}>
-          <Text style={s.kicker}>FOCUSING</Text>
+          <Text style={s.kicker}>{state.focusStrict ? 'FOCUSING · STRICT' : 'FOCUSING'}</Text>
           <Text style={s.clock}>{fmtClock((state.focusEnd - now) / 1000)}</Text>
           <Text style={s.dim}>Your limited apps are blocked until the timer ends.</Text>
-          {state.why ? <Text style={s.why}>“{state.why}”</Text> : null}
+          {state.why ? <Text style={[s.why, quote]}>“{state.why}”</Text> : null}
         </View>
         <View style={{ gap: 4 }}>
           <Button label="Done" ghost onPress={onBack} />
@@ -132,10 +132,10 @@ const s = StyleSheet.create({
   pad: { flex: 1, padding: 24, paddingTop: 32 },
   body: { flex: 1, paddingHorizontal: 24, paddingBottom: 8, justifyContent: 'space-between' },
   title: { color: c.text, fontSize: 28, fontWeight: '700', marginBottom: 24 },
-  kicker: { color: c.dim, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
+  kicker: { color: c.calm, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
   clock: { color: c.text, fontSize: 80, fontWeight: '200', fontVariant: ['tabular-nums'] },
   dim: { color: c.dim, fontSize: 14, lineHeight: 20, textAlign: 'left' },
-  why: { color: c.text, fontSize: 16, fontStyle: 'italic', textAlign: 'center', marginTop: 16, lineHeight: 23 },
+  why: { color: c.text, fontSize: 18, textAlign: 'center', marginTop: 16, lineHeight: 23 },
   chips: { flexDirection: 'row', gap: 10 },
   chip: { flex: 1, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
   chipOn: { backgroundColor: c.text, borderColor: c.text },
